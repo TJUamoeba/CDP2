@@ -60,6 +60,10 @@ void setup() {
 
 	//连接WiFi
 	Serial.printf("Connecting to %s ", ssid);
+
+	WiFi.mode(WIFI_STA);
+	WiFi.setAutoConnect(false);
+
 	WiFi.begin(ssid, password);
 	while (WiFi.status() != WL_CONNECTED)
 	{
@@ -81,8 +85,19 @@ void loop() {
 		boolean currentLineIsBlank = true;
 		Serial.println("[Client connected]");
 
+		unsigned long previousMillis = millis();//获取当前时间
+
 		while (client.connected())
 		{
+			if (millis() - previousMillis >= 50) 
+			{
+				yield();
+			}
+			if (millis() - previousMillis >= 5000)
+			{
+				break;
+			}
+
 			//Serial.println("connected");
 			if (client.available())
 			{
