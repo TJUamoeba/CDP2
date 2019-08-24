@@ -12,7 +12,7 @@
         android:id="@+id/image_haze"
         android:layout_width="50dp"
         android:layout_height="40dp"
-        android:background="@drawable/background"
+        android:background="@drawable/but"
         app:srcCompat="@android:drawable/ic_menu_revert" />
 
     <TextView
@@ -28,7 +28,7 @@
         android:layout_width="80dp"
         android:layout_height="40dp"
         android:layout_marginTop="40dp"
-        android:layout_marginLeft="100dp"
+        android:layout_marginLeft="115dp"
         android:gravity="center"
         android:text="烟雾"
         android:textSize="25sp"
@@ -42,13 +42,15 @@
         android:layout_marginLeft="210dp"
         android:background="@null"
         android:textSize="25sp"
+        android:lines="1"
+        android:singleLine="true"
         ></EditText>
 
     <TextView
         android:layout_width="80dp"
         android:layout_height="40dp"
         android:layout_marginTop="40dp"
-        android:layout_marginLeft="100dp"
+        android:layout_marginLeft="115dp"
         android:gravity="center"
         android:text="雾霾"
         android:textSize="25sp"
@@ -62,6 +64,8 @@
         android:layout_marginLeft="210dp"
         android:background="@null"
         android:textSize="25sp"
+        android:lines="1"
+        android:singleLine="true"
         ></EditText>
 
     <TextView
