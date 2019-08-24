@@ -6,7 +6,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/background"
-        tools:context="com.example.esp_app.MainActivity">-->
+        tools:context="com.example.esp_app.SpinnerActicity">-->
 
 
         <TextView
@@ -71,15 +71,16 @@
             android:text="led关"
             android:textSize="20sp" />
 
-        <Spinner
-            android:id="@+id/spi_list"
-            android:layout_marginLeft="20dp"
-            android:layout_width="80dp"
-            android:layout_height="40dp"
-            android:entries="@array/functions"
-            android:dropDownWidth="150dp"
-            android:background="@drawable/background">
+    <Spinner
+        android:id="@+id/spi_list"
+        android:layout_width="130dp"
+        android:layout_height="40dp"
+        android:layout_marginLeft="-20dp"
+        android:background="@drawable/background"
+        android:dropDownWidth="150dp"
+        android:entries="@array/functions"
+        android:paddingLeft="20dp">
 
-        </Spinner>
+    </Spinner>
 
     </LinearLayout>
