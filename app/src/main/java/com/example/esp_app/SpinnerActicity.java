@@ -44,7 +44,7 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
         port = (EditText) findViewById(R.id.port_num);
 
         String[] arr = {"数据栏▽", "温湿数据", "烟霾数据", "火焰指数"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, arr);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, arr);
 
         spi.setAdapter(adapter);
         spi.setOnItemSelectedListener((AdapterView.OnItemSelectedListener) this);
