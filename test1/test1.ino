@@ -22,7 +22,6 @@ String ledReport = String("OFF");
 String temReport = String("0");
 String humReport = String("0");
 
-String homePage = String("");
 String mainPage1 = String("") +
 	"<html5>" +
 	"    <head>" +
@@ -142,15 +141,15 @@ String mainPage2 = String("") +
 	"                    <ul>" +
 	"                        <li><a href=\"/\" data-bn-ipg=\"mindex-left-nav-index\"><span>首页</span></a></li>" +
 	"                        <li><a href=\"LED\"><span>LED灯</span></a></li>" +
-	"                        <li><a href=\"#\"><span>温湿数据</span></a></li>" +
-	"                        <li><a href=\"#\"><span>烟霾数据</span></a></li>" +
-	"                        <li><a href=\"#\"><span>火焰指数</span></a></li>" +
+	"                        <li><a href=\"TemHum\"><span>温湿数据</span></a></li>" +
+	"                        <li><a href=\"/\"><span>烟霾数据</span></a></li>" +
+	"                        <li><a href=\"/\"><span>火焰指数</span></a></li>" +
 	"                    </ul>" +
 	"                </nav>" +
 	"                <section class=\"qui-asideTool\">" +
 	"                    <ul>" +
-	"                        <li><a href=\"#\"><span>问题反馈</span></a></li>" +
-	"                        <li><a href=\"#\"><span>关于我们</span></a></li>" +
+	"                        <li><a href=\"/\"><span>问题反馈</span></a></li>" +
+	"                        <li><a href=\"/\"><span>关于我们</span></a></li>" +
 	"                    </ul>" +
 	"                </section>" +
 	"            </section>" +
@@ -159,13 +158,13 @@ String mainPage2 = String("") +
 	"    </body>" +
 	"</html5>";
 
-String RewritePage(String postPage) 
+String RewritePage(String postPage) //组合html
 {
 	String page = mainPage1 + postPage + mainPage2;
 	return page;
 }
 
-void handleRoot()
+void handleRoot()//访问主页
 {
 	byte tem = 0;
 	byte hum = 0;
@@ -176,7 +175,7 @@ void handleRoot()
 		"                <p>LED: " + ledReport + "</p>" +
 		"                <p>温度: " + temReport + "℃</p>" +
 		"                <p>湿度: " + humReport + "%</p>";
-	homePage = RewritePage(postPage);
+	String homePage = RewritePage(postPage);
 	server.send(200, "text/html", homePage);
 	Serial.println("用户访问了主页");
 }
@@ -211,6 +210,17 @@ void handleSwitch()
 		ledReport = "OFF";
 		handleLED();
 	}
+}
+
+void handleTemHum() 
+{
+	String postPage = String("") +
+		"                <p>温度:" + temReport + "℃&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp湿度:" + humReport + "%</p>" +
+		"                <p>温度历史曲线</p>" +
+		"                <p>湿度历史曲线</p>";
+	String temHumPage = RewritePage(postPage);
+	server.send(200, "text/html", temHumPage);
+	Serial.println("用户访问了温湿数据页面");
 }
 
 void handleNotFound()
@@ -260,6 +270,7 @@ void setup() {
 	server.on("/", handleRoot);
 	server.on("/LED", handleLED);
 	server.on("/Switch", handleSwitch);
+	server.on("/TemHum", handleTemHum);
 	server.onNotFound(handleNotFound);
 	server.begin();
 	Serial.println("HTTP server started");
