@@ -1,8 +1,13 @@
 #include <ESP8266WiFi.h>
+#include <SimpleDHT.h>
+
+//DHT11温湿度传感器使用D4接口
+int pinDHT11 = 2;
+SimpleDHT11 dht11(pinDHT11);
 
 //网络名和密码
-const char *ssid = "OPPO R11";
-const char *password = "rsijpkvs";
+const char *ssid = "335Room";
+const char *password = "helloworld";
 
 WiFiServer server(80);
 
@@ -18,7 +23,7 @@ String("") +
 "\r\n";
 
 //网页
-String myhtmlPage =
+String myhtmlPage1 =
 	String("") +
 	"<html>" +
 	"<head>" +
@@ -42,11 +47,14 @@ String myhtmlPage =
 	"        }" +
 	"    </script>" +
 	"</head>" +
-	"<body>" +
+	"<body>";
+String myhtmlPage2 = 
+  String("") +
 	"    <div id=\"txtState\">LED</div>" +
 	"    <input type=\"button\" value=\"Switch\" Onclick=\"ledSwitch()\">" +
 	"</body>" +
 	"</html>";
+String report1 = String("");
 
 bool isLedTurnOn = false;
 
@@ -74,6 +82,14 @@ void setup() {
 
 	server.begin();
 	Serial.printf("Web server started, open %s in a web browser\n", WiFi.localIP().toString().c_str());
+
+  //温湿度初始化
+  byte temperature = 0;
+  byte humidity = 0;
+  int err = SimpleDHTErrSuccess;
+  if ((err = dht11.read(&temperature, &humidity, NULL)) == SimpleDHTErrSuccess) {
+    report1 = String("") + "<p>temperature/humitiy： " + temperature + "°C, " + humidity + "% "+ "</p>"; 
+  }
 }
 
 void loop() {
@@ -112,7 +128,9 @@ void loop() {
 					{
 						//Serial.println("gethttp");
 						client.print(responseHeaders);
-						client.print(myhtmlPage);
+						client.print(myhtmlPage1);
+						client.print(report1);
+            client.print(myhtmlPage2);
 						client.print("\r\n");
 					}
 					else if (readString.startsWith("GET /Switch"))
