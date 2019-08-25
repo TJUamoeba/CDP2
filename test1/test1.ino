@@ -17,17 +17,6 @@ ESP8266WebServer server(80);
 bool isLedTurnOn = false;
 String Led_Content = "已关闭";
 
-//用于存放从客户端接收到的数据
-String readString = "";
-
-//响应头
-String responseHeaders =
-String("") +
-"HTTP/1.1 200 OK\r\n" +
-"Content-Tyoe: text/html\r\n" +
-"Connection: close\r\n" +
-"\r\n";
-
 //网页
 String ledReport = String("OFF");
 String temReport = String("0");
