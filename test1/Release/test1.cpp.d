@@ -132,4 +132,7 @@ C:\Users\李琛\AppData\Local\Temp\VMBuilds\test1\esp8266_generic\Release\test1.cp
  C:\Users\李琛\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.5.2\libraries\ESP8266WiFi\src/CertStoreBearSSL.h \
  C:\Users\李琛\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.5.2\libraries\ESP8266WiFi\src/BearSSLHelpers.h \
  C:\Users\李琛\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.5.2\libraries\ESP8266WiFi\src/WiFiServerSecureBearSSL.h \
- C:\Users\李琛\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.5.2\libraries\ESP8266WiFi\src/WiFiClientSecure.h
+ C:\Users\李琛\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.5.2\libraries\ESP8266WiFi\src/WiFiClientSecure.h \
+ C:\Users\李琛\Documents\Arduino\libraries\SimpleDHT/SimpleDHT.h \
+ C:\Users\李琛\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.5.2\libraries\ESP8266WebServer\src/ESP8266WebServer.h \
+ C:\Users\李琛\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.5.2\libraries\ESP8266WebServer\src/detail/RequestHandler.h
