@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background"
+    android:orientation="vertical">
+
+    <ImageButton
+        android:id="@+id/image_humiture"
+        android:layout_width="50dp"
+        android:layout_height="40dp"
+        android:background="@drawable/but"
+        app:srcCompat="@android:drawable/ic_menu_revert" />
+
+    <TextView
+        android:layout_width="200dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="40dp"
+        android:gravity="center"
+        android:text="当前温湿度数据"
+        android:textSize="25sp"></TextView>
+
+    <TextView
+        android:layout_width="80dp"
+        android:layout_height="40dp"
+        android:layout_marginLeft="100dp"
+        android:layout_marginTop="40dp"
+        android:gravity="center"
+        android:text="温度"
+        android:textSize="25sp"></TextView>
+
+    <EditText
+        android:id="@+id/tem_txt"
+        android:layout_width="100dp"
+        android:layout_height="40dp"
+        android:layout_marginLeft="210dp"
+        android:layout_marginTop="-40dp"
+        android:background="@null"
+        android:textSize="25sp"
+        android:lines="1"
+        android:singleLine="true"
+        ></EditText>
+
+    <TextView
+        android:layout_width="80dp"
+        android:layout_height="40dp"
+        android:layout_marginLeft="100dp"
+        android:layout_marginTop="40dp"
+        android:gravity="center"
+        android:text="湿度"
+        android:textSize="25sp"></TextView>
+
+    <EditText
+        android:id="@+id/wat_txt"
+        android:layout_width="100dp"
+        android:layout_height="40dp"
+        android:layout_marginLeft="210dp"
+        android:layout_marginTop="-41dp"
+        android:background="@null"
+        android:textSize="25sp"
+        android:lines="1"
+        android:singleLine="true"
+        ></EditText>
+
+    <TextView
+        android:layout_width="200dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="40dp"
+        android:gravity="center"
+        android:text="历史温湿度数据"
+        android:textSize="25sp"></TextView>
+
+
+
+</LinearLayout>
