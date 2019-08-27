@@ -77,6 +77,10 @@ public class MainActivity extends View {
 
 
     }
+
+    private void DrawBrokenLine(Canvas canvas) {
+    }
+
     /**绘制线上的圆*/
     private void DrawLineCircle(Canvas canvas) {
         Point[] points= getPoints(value,mNeedDrawHeight,mNeedDrawWidth,maxVlaue,mBrokenLineLeft,mBrokenLineTop);
@@ -92,20 +96,21 @@ public class MainActivity extends View {
              * drawCircle(float cx, float cy, float radius, Paint paint)
              * cx 中间x坐标
              * xy 中间y坐标
-             * radius 圆的半径
-             * paint 绘制圆的画笔
-             * */
-            canvas.drawCircle(point.x,point.y,radius,mCirclePaint);
-
-        }
-    }
 
     /**根据值绘制折线*/
     private void DrawBrokenLine(Canvas canvas) {
         Path mPath=new Path();
         mBrokenLinePaint.setColor(Color.BLUE);
+             //* radius 圆的半径
+             //* paint 绘制圆的画笔
+             //* */
+        canvas.drawCircle(point.x,point.y,radius,mCirclePaint);
+
+    }
+}
         mBrokenLinePaint.setStrokeWidth(2);
         Point[] points= getPoints(value,mNeedDrawHeight,mNeedDrawWidth,maxVlaue,mBrokenLineLeft,mBrokenLineTop);
+        Path mPath;
         for (int i = 0; i < points.length; i++) {
             Point point=points[i];
             if(i==0){
