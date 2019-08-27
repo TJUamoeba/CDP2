@@ -1,6 +1,8 @@
 #include <ESP8266WiFi.h>
 #include <SimpleDHT.h>
 #include <ESP8266WebServer.h>
+#include "Ticker.h"
+#define QUEUE_LENGTH 30
 
 //DHT11温湿度传感器使用D4接口
 int pinDHT11 = 2;
@@ -12,10 +14,19 @@ SimpleDHT11 dht11(pinDHT11);
 const char *ssid = "OPPO R11";
 const char *password = "rsijpkvs";
 
+//Web服务器
 ESP8266WebServer server(80);
 
 bool isLedTurnOn = false;
+bool isReadData = false;
 String Led_Content = "已关闭";
+
+//温湿度数据
+byte temQueue[QUEUE_LENGTH];
+byte humQueue[QUEUE_LENGTH];
+
+//定时调度
+Ticker myTicker;
 
 //网页
 String ledReport = String("OFF");
@@ -65,7 +76,13 @@ String mainPage1 = String("") +
 	"                text - align: center;" +
     "                font - size: 24px;" +
     "                background - color: darkgrey" +
-	"			 }"
+	"			 }" +
+	"            .container canvas{" +
+	"                margin-left: 70px;" +
+    "                width: 500px;" +
+    "                height: 300px;" +
+    "                border: 1px solid black" +
+	"			 }" +
 	"            .qui-asides{" +
 	"                position: center;" +
 	"                left: -200px;" +
@@ -214,10 +231,50 @@ void handleSwitch()
 
 void handleTemHum() 
 {
-	String postPage = String("") +
+	byte tem = 0;
+	byte hum = 0;
+	dht11.read(&tem, &hum, NULL);
+	temReport = String(tem);
+	humReport = String(hum);
+	String postPage1 = String("") +
 		"                <p>温度:" + temReport + "℃&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp湿度:" + humReport + "%</p>" +
 		"                <p>温度历史曲线</p>" +
-		"                <p>湿度历史曲线</p>";
+		"                <canvas id=\"TemGraph\"></canvas>" +
+		"                <p>湿度历史曲线</p>" +
+		"                <canvas id=\"HumGraph\"></canvas>" +
+		"                <script type=\"text/javascript\">" +
+		"                    var canvas1 = document.getElementById(\'TemGraph\');" +
+		"                    var ctx1 = canvas1.getContext(\'2d\');" +
+		"                    ctx1.lineWidth = \"1px\";" +
+		"                    ctx1.strokeStyle = \"#999\";" +
+		"                    ctx1.moveTo(10, 25);" +
+		"                    ctx1.lineTo(10, 125);" +
+		"                    ctx1.lineTo(280, 125);";
+	String postPage2 = String("") +
+		"                    ctx1.stroke();" +
+		"                    var canvas2 = document.getElementById(\'HumGraph\');" +
+		"                    var ctx2 = canvas2.getContext(\'2d\');" +
+		"                    ctx2.lineWidth = \"1px\";" +
+		"                    ctx2.strokeStyle = \"#999\";" +
+		"                    ctx2.moveTo(10, 25);" +
+		"                    ctx2.lineTo(10, 125);" +
+		"                    ctx2.lineTo(280, 125);";
+	String postPage3 = String("") +
+		"                    ctx2.stroke();" +
+		"                </script>";
+	String postPage = String("");
+	//绘制温度曲线
+	String graph1 = String("") + "                    ctx1.moveTo(10, " + (String)(125 - temQueue[0]) + ");";
+	for (int i = 1; i < QUEUE_LENGTH - 1; i++) 
+	{
+		graph1 += "                    ctx1.lineTo(" + (String)(10 + 9 * i) + ", " + (String)(125 - temQueue[i]) + ");";
+	}
+	//绘制湿度曲线
+	String graph2 = String("") + "                    ctx2.moveTo(" + (String)(10) + ", " + (String)(125 - humQueue[0]) + ");";
+	for (int i = 1; i < QUEUE_LENGTH - 1; i++) {
+		graph2 += "                    ctx2.lineTo(" + (String)(10 + 9 * i) + ", " + (String)(125 - humQueue[i]) + ");";
+	}
+	postPage = postPage1 + graph1 + postPage2 + graph2 + postPage3;
 	String temHumPage = RewritePage(postPage);
 	server.send(200, "text/html", temHumPage);
 	Serial.println("用户访问了温湿数据页面");
@@ -227,6 +284,28 @@ void handleNotFound()
 {
 	server.send(404, "text/plain", "访问网页不存在");
 	Serial.println("用户访问了一个不存在的网页");
+}
+
+void readData() 
+{
+	isReadData = true;
+}
+
+void queueInit(byte queue[]) 
+{
+	for (int i = 0; i < QUEUE_LENGTH; i++) 
+	{
+		queue[i] = 0;
+	}
+}
+
+void queuePush(byte newdata, byte queue[]) 
+{
+	for (int i = 0; i < QUEUE_LENGTH - 1; i++) 
+	{
+		queue[i] = queue[i + 1];
+	}
+	queue[QUEUE_LENGTH - 1] = newdata;
 }
 
 void setup() {
@@ -242,7 +321,7 @@ void setup() {
 	//初始化网络并连接WiFi
 	Serial.printf("Connecting to %s ", ssid);
 
-	WiFi.mode(WIFI_STA);
+	WiFi.mode(WIFI_AP_STA);
 	WiFi.setAutoConnect(false);
 
 	WiFi.begin(ssid, password);
@@ -259,11 +338,15 @@ void setup() {
 	//温湿度初始化
 	byte temperature = 0;
 	byte humidity = 0;
+	queueInit(temQueue);
+	queueInit(humQueue);
 	int err = SimpleDHTErrSuccess;
 	if ((err = dht11.read(&temperature, &humidity, NULL)) == SimpleDHTErrSuccess) {
 		//report1 = String("") + "<p>temperature/humitiy： " + temperature + "°C, " + humidity + "% "+ "</p>"; 
 		temReport = String(temperature);
 		humReport = String(humidity);
+		queuePush(temperature, temQueue);
+		queuePush(humidity, humQueue);
 	}
 
 	//初始化WebServer
@@ -274,8 +357,21 @@ void setup() {
 	server.onNotFound(handleNotFound);
 	server.begin();
 	Serial.println("HTTP server started");
+
+	//定时调度
+	myTicker.attach(1, readData);
 }
 
 void loop() {
 	server.handleClient();
+	if (isReadData == true) {
+		byte tem = 0;
+		byte hum = 0;
+		int err = SimpleDHTErrSuccess;
+		if ((err = dht11.read(&tem, &hum, NULL)) == SimpleDHTErrSuccess) {
+			queuePush(tem, temQueue);
+			queuePush(hum, humQueue);
+		}
+		isReadData = false;
+	}
 }
