@@ -2,6 +2,7 @@ package com.example.esp_app;
 
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -46,7 +47,6 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
     private EditText port;  //端口号
     private int iport;      //字符端口
     private Socket socket;  //套接字
-    private OutputStream out; //打印输出流
     private ConnectThread mConnectThread; //Tcp连接线程
     SharedPreferences.Editor editor;
     SharedPreferences sharedPreferences;
@@ -72,8 +72,38 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
 
         spi.setAdapter(adapter);
         spi.setOnItemSelectedListener((AdapterView.OnItemSelectedListener) this);
-        ledOn.setOnClickListener((View.OnClickListener) this);
-        ledOff.setOnClickListener((View.OnClickListener)this);
+        ledOn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new Thread(){
+                    public void run(){
+                        try{
+                            mConnectThread.OutPut();
+                            mConnectThread.out.write(0);
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
+                    }
+                }.start();
+
+            }
+        });
+        ledOff.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new Thread(){
+                    public void run(){
+                        try{
+                            mConnectThread.OutPut();
+                            mConnectThread.out.write(1);
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
+                    }
+                }.start();
+
+            }
+        });
         connect.setOnClickListener((View.OnClickListener)this);
 
         Ip.setText(sharedPreferences.getString(Pre_IP,""));
@@ -124,8 +154,9 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
             case R.id.led_open_but:{
                 if(socket!=null){
                     try{
-                        out.write(1);
+                        mConnectThread.out.write(1);
                     }catch (Exception e){
+                        e.printStackTrace();
                     }
                 }
 
@@ -134,9 +165,10 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
             case R.id.led_close_but:{
                 if(socket!=null){
                     try{
-                        out.write(0);
-                        out.flush();
+                        mConnectThread.out.write(0);
+
                     }catch (Exception e){
+                        e.printStackTrace();
                     }
                 }
                 break;
@@ -178,10 +210,18 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
     private class ConnectThread extends Thread {
         private String ip;
         private int port;
+        private OutputStream out;
 
         public ConnectThread(String ip, int port) {
             this.ip = ip;
             this.port = port;
+        }
+        public void OutPut(){
+            try {
+                out=socket.getOutputStream();
+            }catch (IOException e){
+                e.printStackTrace();
+            }
         }
 
         @Override
@@ -202,6 +242,7 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        connect.setText("连接");
                         Toast.makeText(SpinnerActicity.this, "连接失败", Toast.LENGTH_LONG).show();
                     }
                 });
