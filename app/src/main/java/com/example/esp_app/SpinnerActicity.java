@@ -1,8 +1,12 @@
 package com.example.esp_app;
 
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Message;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -12,11 +16,25 @@ import android.widget.Spinner;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
+
 import androidx.appcompat.app.AppCompatActivity;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.Socket;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public class SpinnerActicity extends AppCompatActivity implements OnItemSelectedListener,View.OnClickListener {
     private Spinner spi = null;//下拉菜单
@@ -28,13 +46,19 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
     private EditText port;  //端口号
     private int iport;      //字符端口
     private Socket socket;  //套接字
-    private PrintStream out; //打印输出流
+    private OutputStream out; //打印输出流
     private ConnectThread mConnectThread; //Tcp连接线程
+    SharedPreferences.Editor editor;
+    SharedPreferences sharedPreferences;
+    public final static String Pre_IP="PREF_IP_ADDRESS";
+    public final static String Pre_PORT="PREF_PORT_NUMBER";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        sharedPreferences=getSharedPreferences("HTTP_HELPER_PREFS", Context.MODE_PRIVATE);
+        editor=sharedPreferences.edit();
 
         spi = (Spinner) findViewById(R.id.spi_list);
         ledOn = (Button) findViewById(R.id.led_open_but);
@@ -51,10 +75,24 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
         ledOn.setOnClickListener((View.OnClickListener) this);
         ledOff.setOnClickListener((View.OnClickListener)this);
         connect.setOnClickListener((View.OnClickListener)this);
+
+        Ip.setText(sharedPreferences.getString(Pre_IP,""));
+        port.setText(sharedPreferences.getString(Pre_PORT,""));
     }
 
     @Override
     public void onClick(View view){
+        //save the used Ip and port
+        String IPAddress=Ip.getText().toString().trim();
+        String PortNumber=port.getText().toString().trim();
+        editor.putString(Pre_IP,IPAddress);
+        editor.putString(Pre_PORT,PortNumber);
+        editor.commit();
+
+//        if(IPAddress.length()>0&&PortNumber.length()>0&&view.getId()==connect.getId()){
+//            new HttpRequestAsyncTask(view.getContext(),IPAddress,PortNumber).execute();
+//        }
+
         switch (view.getId()){
             case R.id.IP_connect_but:{
                 //建立连接
@@ -84,16 +122,22 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
                 break;
             }
             case R.id.led_open_but:{
-                if(out!=null){
-                    out.print("0");
-                    out.flush();
+                if(socket!=null){
+                    try{
+                        out.write(1);
+                    }catch (Exception e){
+                    }
                 }
+
                 break;
             }
             case R.id.led_close_but:{
-                if(out!=null){
-                    out.print("1");
-                    out.flush();
+                if(socket!=null){
+                    try{
+                        out.write(0);
+                        out.flush();
+                    }catch (Exception e){
+                    }
                 }
                 break;
             }
@@ -106,19 +150,21 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
         String content = spi.getSelectedItem().toString();
         switch (content) {
             case "温湿数据": {
-                Intent intent = new Intent(this, HumitureActivity.class);
+                Intent intent = new Intent(SpinnerActicity.this, HumitureActivity.class);
+                Bundle bundle=new Bundle();
+                intent.putExtras(bundle);
                 startActivity(intent);
                 break;
             }
 
             case "烟霾数据": {
-                Intent intent = new Intent(this, HazeActiviy.class);
+                Intent intent = new Intent(SpinnerActicity.this, HazeActiviy.class);
                 startActivity(intent);
                 break;
             }
 
             case "火焰指数": {
-                Intent intent = new Intent(this, FireActivity.class);
+                Intent intent = new Intent(SpinnerActicity.this, FireActivity.class);
                 startActivity(intent);
                 break;
             }
@@ -127,6 +173,7 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
 
     public void onNothingSelected(AdapterView<?> parent) {
     }
+
 
     private class ConnectThread extends Thread {
         private String ip;
@@ -141,7 +188,7 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
         public void run() {
             try {
                 socket = new Socket(ip, port);
-                out = new PrintStream(socket.getOutputStream());
+                out = socket.getOutputStream();
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -162,6 +209,87 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
         }
 
     }
+    //    public String sendRequest(String ipAddress, String portNumber) {
+//        String serverResponse = "ERROR";
+//
+//        try {
+//
+//            HttpClient httpclient = new DefaultHttpClient(); // create an HTTP client
+//            // define the URL e.g. http://myIpaddress:myport/?pin=13 (to toggle pin 13 for example)
+//            URI website = new URI("http://"+ipAddress+":"+portNumber+"/?");
+//            HttpGet getRequest = new HttpGet(); // create an HTTP GET object
+//            getRequest.setURI(website); // set the URL of the GET request
+//            HttpResponse response = httpclient.execute(getRequest); // execute the request
+//            // get the ip address server's reply
+//            InputStream content = null;
+//            content = response.getEntity().getContent();
+//            BufferedReader in = new BufferedReader(new InputStreamReader(
+//                    content
+//            ));
+//            serverResponse = in.readLine();
+//            // Close the connection
+//            content.close();
+//        } catch (ClientProtocolException e) {
+//            // HTTP error
+//            serverResponse = e.getMessage();
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            // IO error
+//            serverResponse = e.getMessage();
+//            e.printStackTrace();
+//        } catch (URISyntaxException e) {
+//            // URL syntax error
+//            serverResponse = e.getMessage();
+//            e.printStackTrace();
+//        }
+//        // return the server's reply/response text
+//        return serverResponse;
+//    }
+//
+//    private class HttpRequestAsyncTask extends AsyncTask<Void, Void, Void> {
+//        private String requestReply, ipAddress, portNumber;
+//        private Context context;
+//        private AlertDialog alertDialog;
+//
+//        public HttpRequestAsyncTask(Context context, String ipAddress, String portNumber) {
+//            this.context = context;
+//
+//            alertDialog = new AlertDialog.Builder(this.context)
+//                    .setTitle("HTTP Response From IP Address:")
+//                    .setCancelable(true)
+//                    .create();
+//
+//            this.ipAddress = ipAddress;
+//            this.portNumber = portNumber;
+//        }
+//
+//        @Override
+//        protected Void doInBackground(Void... voids) {
+//            alertDialog.setMessage("Data sent, waiting for reply from server...");
+//            if (!alertDialog.isShowing()) {
+//                alertDialog.show();
+//            }
+//            requestReply = sendRequest(ipAddress, portNumber);
+//            return null;
+//        }
+//
+//        @Override
+//        protected void onPostExecute(Void aVoid) {
+//            alertDialog.setMessage(requestReply);
+//            if (!alertDialog.isShowing()) {
+//                alertDialog.show(); // show dialog
+//            }
+//        }
+//
+//        @Override
+//        protected void onPreExecute() {
+//            alertDialog.setMessage("Sending data to server, please wait...");
+//            if (!alertDialog.isShowing()) {
+//                alertDialog.show();
+//            }
+//
+//        }
+//    }
 }
 
 
