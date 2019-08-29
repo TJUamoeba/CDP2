@@ -3,19 +3,28 @@
 #include <ESP8266WebServer.h>
 #include "Ticker.h"
 #define QUEUE_LENGTH 30
+#define MAX_SRV_CLIENTS 5 //最大同时连接数
+
+//发送数据缓存
+int bufLen = 0;
+byte sbuf[QUEUE_LENGTH * 2];
 
 //DHT11温湿度传感器使用D4接口
 int pinDHT11 = 2;
 SimpleDHT11 dht11(pinDHT11);
 
-//网络名和密码
-//const char *ssid = "335Room";
-//const char *password = "helloworld";
-const char *ssid = "OPPO R11";
-const char *password = "rsijpkvs";
+//TCP Server
+WiFiServer tcpServer(8266);
+WiFiClient serverClients[MAX_SRV_CLIENTS];
 
-//Web服务器
-ESP8266WebServer server(80);
+//Web Server
+ESP8266WebServer webServer(80);
+
+//网络名和密码
+const char *ssid = "335Room";
+const char *password = "helloworld";
+//const char *ssid = "OPPO R11";
+//const char *password = "rsijpkvs";
 
 bool isLedTurnOn = false;
 bool isReadData = false;
@@ -193,7 +202,7 @@ void handleRoot()//访问主页
 		"                <p>温度: " + temReport + "℃</p>" +
 		"                <p>湿度: " + humReport + "%</p>";
 	String homePage = RewritePage(postPage);
-	server.send(200, "text/html", homePage);
+	webServer.send(200, "text/html", homePage);
 	Serial.println("用户访问了主页");
 }
 
@@ -203,7 +212,7 @@ void handleLED()
 		"                <p>LED" + Led_Content + "</p>" +
 		"                <p><a href = \"Switch\">开/关</a></p>";
 	String ledPage = RewritePage(postPage);
-	server.send(200, "text/html", ledPage);
+	webServer.send(200, "text/html", ledPage);
 	Serial.println("用户访问了LED页面");
 }
 
@@ -276,13 +285,38 @@ void handleTemHum()
 	}
 	postPage = postPage1 + graph1 + postPage2 + graph2 + postPage3;
 	String temHumPage = RewritePage(postPage);
-	server.send(200, "text/html", temHumPage);
+	webServer.send(200, "text/html", temHumPage);
 	Serial.println("用户访问了温湿数据页面");
+}
+
+void getTH(){
+  byte tem = 0;
+  byte hum = 0;
+  dht11.read(&tem, &hum, NULL);
+  sbuf[0] = tem;
+  sbuf[1] = hum;
+  bufLen = 2; 
+}
+
+String getTHhistory(){
+  uint8_t i = 0;
+  String temReport = "temperature: ";
+  for (i = 1; i < QUEUE_LENGTH - 1; i++){
+    temReport += temQueue[i] + ",";
+    //sbuf[i] = temQueue[i];
+  }
+  temReport += "humidity: ";
+  for(; i < QUEUE_LENGTH * 2; i++){
+    temReport += humQueue[i - QUEUE_LENGTH] + ",";
+    //sbuf[i] = temQueue[i - QUEUE_LENGTH];
+  }
+  return temReport;
+  //bufLen = QUEUE_LENGTH * 2;
 }
 
 void handleNotFound()
 {
-	server.send(404, "text/plain", "访问网页不存在");
+	webServer.send(404, "text/plain", "访问网页不存在");
 	Serial.println("用户访问了一个不存在的网页");
 }
 
@@ -330,9 +364,14 @@ void setup() {
 		delay(500);
 		Serial.print(".");
 	}
-	Serial.println(" connected");
+  Serial.println(" ");
+	Serial.println("Connected");
 
-	server.begin();
+  tcpServer.begin();
+  tcpServer.setNoDelay(true);
+  Serial.println("TCP Server started, IP Address: " + WiFi.localIP().toString() + "  Port: 8266");
+
+	webServer.begin();
 	Serial.printf("Web server started, open %s in a web browser\n", WiFi.localIP().toString().c_str());
 
 	//温湿度初始化
@@ -350,12 +389,12 @@ void setup() {
 	}
 
 	//初始化WebServer
-	server.on("/", handleRoot);
-	server.on("/LED", handleLED);
-	server.on("/Switch", handleSwitch);
-	server.on("/TemHum", handleTemHum);
-	server.onNotFound(handleNotFound);
-	server.begin();
+	webServer.on("/", handleRoot);
+	webServer.on("/LED", handleLED);
+	webServer.on("/Switch", handleSwitch);
+	webServer.on("/TemHum", handleTemHum);
+	webServer.onNotFound(handleNotFound);
+	webServer.begin();
 	Serial.println("HTTP server started");
 
 	//定时调度
@@ -363,7 +402,8 @@ void setup() {
 }
 
 void loop() {
-	server.handleClient();
+	//Web Server
+	webServer.handleClient();
 	if (isReadData == true) {
 		byte tem = 0;
 		byte hum = 0;
@@ -374,4 +414,50 @@ void loop() {
 		}
 		isReadData = false;
 	}
+
+  //TCP Server
+  uint8_t i;
+  String quest = "";
+  if (tcpServer.hasClient()) {
+    for (i = 0; i < MAX_SRV_CLIENTS; i++) {
+      //未连接时释放
+      if (!serverClients[i] || !serverClients[i].connected()) {
+        if (serverClients[i]) serverClients[i].stop();
+        serverClients[i] = tcpServer.available();
+        continue;
+      }
+    }
+    WiFiClient serverClient = tcpServer.available();
+    serverClient.stop();
+  }
+  
+  for (i = 0; i < MAX_SRV_CLIENTS; i++) {
+    if (serverClients[i] && serverClients[i].connected()) {
+      //有链接时灯常亮
+      digitalWrite(16, 0);
+      if (serverClients[i].available()) {
+        while (serverClients[i].available()) {
+          quest += serverClients[i].read();
+          Serial.write("Receive quest: " + serverClients[i].read());
+          Serial.println("Receive quest : " + quest);
+          //开灯
+          if (quest == "0" || quest == "1") {
+            handleSwitch();
+          }
+          else if(quest == "50"){
+            getTH();
+            serverClients[i].write(sbuf, bufLen);
+            Serial.printf("TCP client %d get current TH data. \n", i);
+          }
+          else if(quest == "3"){
+            String report = getTHhistory();
+            for(int j = 0; j < report.length(); j++){
+               serverClients[i].write(byte(report[j]));
+            }
+            Serial.printf("TCP client %d get previous TH data. \n", i);            
+          }
+        }
+      }
+    }
+  }
 }
