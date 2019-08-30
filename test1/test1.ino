@@ -2,6 +2,7 @@
 #include <SimpleDHT.h>
 #include <ESP8266WebServer.h>
 #include "Ticker.h"
+#include "FS.h"
 #define QUEUE_LENGTH 30
 #define MAX_SRV_CLIENTS 5 //最大同时连接数
 
@@ -21,10 +22,10 @@ WiFiClient serverClients[MAX_SRV_CLIENTS];
 ESP8266WebServer webServer(80);
 
 //网络名和密码
-const char *ssid = "335Room";
-const char *password = "helloworld";
-//const char *ssid = "OPPO R11";
-//const char *password = "rsijpkvs";
+//const char *ssid = "335Room";
+//const char *password = "helloworld";
+const char *ssid = "OPPO R11";
+const char *password = "rsijpkvs";
 
 bool isLedTurnOn = false;
 bool isReadData = false;
@@ -184,6 +185,24 @@ String mainPage2 = String("") +
 	"    </body>" +
 	"</html5>";
 
+String getContentType(String filename)
+{
+	if (webServer.hasArg("download")) return "application/octet-stream";
+	else if (filename.endsWith(".htm")) return "text/html";
+	else if (filename.endsWith(".html")) return "text/html";
+	else if (filename.endsWith(".css")) return "text/css";
+	else if (filename.endsWith(".js")) return "application/javascript";
+	else if (filename.endsWith(".png")) return "image/png";
+	else if (filename.endsWith(".gif")) return "image/gif";
+	else if (filename.endsWith(".jpg")) return "image/jpeg";
+	else if (filename.endsWith(".ico")) return "image/x-icon";
+	else if (filename.endsWith(".xml")) return "text/xml";
+	else if (filename.endsWith(".pdf")) return "application/x-pdf";
+	else if (filename.endsWith(".zip")) return "application/x-zip";
+	else if (filename.endsWith(".gz")) return "application/x-gzip";
+	return "text/plain";
+}
+
 String RewritePage(String postPage) //组合html
 {
 	String page = mainPage1 + postPage + mainPage2;
@@ -192,7 +211,7 @@ String RewritePage(String postPage) //组合html
 
 void handleRoot()//访问主页
 {
-	byte tem = 0;
+	/*byte tem = 0;
 	byte hum = 0;
 	dht11.read(&tem, &hum, NULL);
 	temReport = String(tem);
@@ -202,7 +221,14 @@ void handleRoot()//访问主页
 		"                <p>温度: " + temReport + "℃</p>" +
 		"                <p>湿度: " + humReport + "%</p>";
 	String homePage = RewritePage(postPage);
-	webServer.send(200, "text/html", homePage);
+	webServer.send(200, "text/html", homePage);*/
+	File file = SPIFFS.open("/index.html", "r");
+	if (!file) {
+		Serial.println("File open failed");
+	}
+	size_t sent = webServer.streamFile(file, "text/html");
+	webServer.send(200, "text/plain", "nb");
+	file.close();
 	Serial.println("用户访问了主页");
 }
 
@@ -316,7 +342,33 @@ String getTHhistory(){
 
 void handleNotFound()
 {
-	webServer.send(404, "text/plain", "访问网页不存在");
+	String path = webServer.uri();
+	Serial.print("load url:");
+	Serial.println(path);
+	String contentType = getContentType(path);
+	String pathWithGz = path + ".gz";
+	if (SPIFFS.exists(pathWithGz) || SPIFFS.exists(path))
+	{
+		if (SPIFFS.exists(pathWithGz))
+			path += ".gz";
+		File file = SPIFFS.open(path, "r");
+		size_t sent = webServer.streamFile(file, contentType);
+		file.close();
+		return;
+	}
+	String message = "File Not Found\n\n";
+	message += "URI: ";
+	message += webServer.uri();
+	message += "\nMethod: ";
+	message += (webServer.method() == HTTP_GET) ? "GET" : "POST";
+	message += "\nArguments: ";
+	message += webServer.args();
+	message += "\n";
+	for (uint8_t i = 0; i < webServer.args(); i++)
+	{
+		message += " " + webServer.argName(i) + ": " + webServer.arg(i) + "\n";
+	}
+	webServer.send(404, "text/plain", message);
 	Serial.println("用户访问了一个不存在的网页");
 }
 
@@ -388,6 +440,12 @@ void setup() {
 		queuePush(humidity, humQueue);
 	}
 
+	//初始化SPIFFS
+	bool ok = SPIFFS.begin();
+	if (!ok) {
+		Serial.println("begin failed");
+	}
+
 	//初始化WebServer
 	webServer.on("/", handleRoot);
 	webServer.on("/LED", handleLED);
@@ -441,9 +499,12 @@ void loop() {
           Serial.write("Receive quest: " + serverClients[i].read());
           Serial.println("Receive quest : " + quest);
           //开灯
-          if (quest == "0" || quest == "1") {
+          if (quest == "0" && isLedTurnOn == true) {
             handleSwitch();
           }
+		  else if (quest == "1" && isLedTurnOn == false) {
+			  handleSwitch();
+		  }
           else if(quest == "50"){
             getTH();
             serverClients[i].write(sbuf, bufLen);
