@@ -46,8 +46,8 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
     private String sip;     //字符串ip
     private EditText port;  //端口号
     private int iport;      //字符端口
-    private Socket socket;  //套接字
-    private ConnectThread mConnectThread; //Tcp连接线程
+    public Socket socket;  //套接字
+    public ConnectThread mConnectThread; //Tcp连接线程
     SharedPreferences.Editor editor;
     SharedPreferences sharedPreferences;
     public final static String Pre_IP="PREF_IP_ADDRESS";
@@ -207,10 +207,10 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
     }
 
 
-    private class ConnectThread extends Thread {
-        private String ip;
-        private int port;
-        private OutputStream out;
+    public class ConnectThread extends Thread {
+        public String ip;
+        public int port;
+        public OutputStream out;
 
         public ConnectThread(String ip, int port) {
             this.ip = ip;
