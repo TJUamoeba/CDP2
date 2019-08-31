@@ -227,7 +227,6 @@ void handleRoot()//访问主页
 		Serial.println("File open failed");
 	}
 	size_t sent = webServer.streamFile(file, "text/html");
-	webServer.send(200, "text/plain", "nb");
 	file.close();
 	Serial.println("用户访问了主页");
 }
@@ -240,6 +239,22 @@ void handleLED()
 	String ledPage = RewritePage(postPage);
 	webServer.send(200, "text/html", ledPage);
 	Serial.println("用户访问了LED页面");
+}
+
+void handleHomedata() 
+{
+	String ledStr, thStr, content;
+	if (isLedTurnOn == false) 
+	{
+		ledStr = "状态: OFF";
+	}
+	else
+	{
+		ledStr = "状态: ON";
+	}
+	thStr = "温度: " + String(temQueue[QUEUE_LENGTH - 1]) + "℃  湿度: " + String(humQueue[QUEUE_LENGTH - 1]) + "%";
+	content = ledStr + ";" + thStr;
+	webServer.send(200, "text/html", content);
 }
 
 void handleSwitch()
@@ -449,6 +464,7 @@ void setup() {
 	//初始化WebServer
 	webServer.on("/", handleRoot);
 	webServer.on("/LED", handleLED);
+	webServer.on("/homedata", handleHomedata);
 	webServer.on("/Switch", handleSwitch);
 	webServer.on("/TemHum", handleTemHum);
 	webServer.onNotFound(handleNotFound);

@@ -92,29 +92,56 @@
             <div class="box">
                 <h2>LED灯</h2>
                 <img src="images/pic1.png" alt="pic1">
-                <p>
-                    状态: OFF
+                <p id="txtLED">
+                    状态: 
                 </p>
+                <script>
+                    window.onload = function () {
+                        var xmlhttp;
+                        if (window.XMLHttpRequest) {
+                            // IE7+, Firefox, Chrome, Opera, Safari 浏览器执行代码
+                            xmlhttp = new XMLHttpRequest();
+                        }
+                        else {
+                            // IE6, IE5 浏览器执行代码
+                            xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+                        }
+
+                        xmlhttp.onreadystatechange = function () {
+                            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                                //alert(xmlhttp.responseText);
+                                //alert("操作成功");
+                                var contents = xmlhttp.responseText.split(';');
+                                document.getElementById("txtLED").innerHTML = contents[0];
+                                document.getElementById("txtTH").innerHTML = contents[1];
+                            }
+                        }
+
+                        var requestString = "/homedata";
+                        xmlhttp.open("GET", requestString, true);
+                        xmlhttp.send(null);
+                    }
+                </script>
             </div>
             <div class="box">
                 <h2>温湿数据</h2>
                 <img src="images/pic2.png" alt="pic2">
-                <p>
-                    温度: 26℃&nbsp; &nbsp; 湿度: 30%
+                <p id="txtTH">
+                    温度: ℃&nbsp; &nbsp; 湿度: %
                 </p>
             </div>
             <div class="box">
                 <h2>烟霾数据</h2>
                 <img src="images/pic3.png" alt="pic3">
                 <p>
-                    指数: 0 
+                    指数:  
                 </p>
             </div>
             <div class="box lastBox">
                 <h2>火焰指数</h2>
                 <img src="images/pic4.png" alt="pic3">
                 <p>
-                    状态: 无 
+                    状态:  
                 </p>
             </div>
             <div class="clearfloat"></div>
