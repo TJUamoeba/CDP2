@@ -78,6 +78,20 @@ p {
 	width:93.75%; /* 960px/1024px  */
 	margin:0 auto;
 }
+.led {
+    text-align: center;
+}
+.switch {
+    text-align: center;
+}
+.switch input {
+    width: 75px;
+    height: 30px;
+    margin-left: 10px;
+    margin-right: 10px;
+    font-size: 21px;
+    font-weight:700;
+}
 .wrapper nav {
     font-size: 18px;
 }
@@ -116,6 +130,12 @@ header {
 	margin:3% 0;
     font-size: 18px
 }
+.graph {
+    float: left;
+    width: 47%;
+    margin: 3% 0;
+    font-size: 18px
+}
 .button {
 	text-align:right;
 }
@@ -123,6 +143,7 @@ header {
 	width:100%;
 	float:left;
 	margin:20px 0 0 0;
+    text-align: center;
 }
 .lastBox {
 	margin-right:0 !important;
@@ -133,6 +154,9 @@ header {
 	margin-right:7%;
 	background: none repeat scroll 0 0 rgba(13, 11, 12, 0.42);
 	padding:1.5%;
+}
+.box h2 {
+    text-align: center;
 }
 .box p {
     margin-top: 10px;

@@ -233,11 +233,17 @@ void handleRoot()//访问主页
 
 void handleLED() 
 {
-	String postPage = String("") +
+	/*String postPage = String("") +
 		"                <p>LED" + Led_Content + "</p>" +
 		"                <p><a href = \"Switch\">开/关</a></p>";
 	String ledPage = RewritePage(postPage);
-	webServer.send(200, "text/html", ledPage);
+	webServer.send(200, "text/html", ledPage);*/
+	File file = SPIFFS.open("/LED.html", "r");
+	if (!file) {
+		Serial.println("File open failed");
+	}
+	size_t sent = webServer.streamFile(file, "text/html");
+	file.close();
 	Serial.println("用户访问了LED页面");
 }
 
@@ -257,6 +263,20 @@ void handleHomedata()
 	webServer.send(200, "text/html", content);
 }
 
+void handleLeddata()
+{
+	String led;
+	if (isLedTurnOn == false)
+	{
+		led = "OFF";
+	}
+	else
+	{
+		led = "ON";
+	}
+	webServer.send(200, "text/html", led);
+}
+
 void handleSwitch()
 {
 	if (isLedTurnOn == false)
@@ -266,7 +286,7 @@ void handleSwitch()
 		isLedTurnOn = true;
 		Led_Content = "已打开";
 		ledReport = "ON";
-		handleLED();
+		//handleLED();
 	}
 	else
 	{
@@ -275,7 +295,7 @@ void handleSwitch()
 		isLedTurnOn = false;
 		Led_Content = "已关闭";
 		ledReport = "OFF";
-		handleLED();
+		//handleLED();
 	}
 }
 
@@ -465,6 +485,7 @@ void setup() {
 	webServer.on("/", handleRoot);
 	webServer.on("/LED", handleLED);
 	webServer.on("/homedata", handleHomedata);
+	webServer.on("/leddata", handleLeddata);
 	webServer.on("/Switch", handleSwitch);
 	webServer.on("/TemHum", handleTemHum);
 	webServer.onNotFound(handleNotFound);

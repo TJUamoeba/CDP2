@@ -33,11 +33,11 @@
                 </div>
                 <nav>
                     <ul>
-                        <li class="active"><a href="">首页</a></li>
-                        <li><a href="">LED灯</a></li>
-                        <li><a href="">温湿数据</a></li>
-                        <li><a href="">烟霾数据</a></li>
-                        <li><a href="">火焰指数</a></li>
+                        <li class="active"><a href="/">首页</a></li>
+                        <li><a href="LED">LED灯</a></li>
+                        <li><a href="TemHum">温湿数据</a></li>
+                        <li><a href="/">烟霾数据</a></li>
+                        <li><a href="/">火焰指数</a></li>
                     </ul>
                 </nav>
                 <div class="clearfloat"></div>
@@ -96,7 +96,7 @@
                     状态: 
                 </p>
                 <script>
-                    window.onload = function () {
+                    function RewriteData() {
                         var xmlhttp;
                         if (window.XMLHttpRequest) {
                             // IE7+, Firefox, Chrome, Opera, Safari 浏览器执行代码
@@ -121,6 +121,12 @@
                         xmlhttp.open("GET", requestString, true);
                         xmlhttp.send(null);
                     }
+                    window.onload = function () {
+                        RewriteData();
+                    }
+                    var interval3 = setInterval(function () {
+                        RewriteData();
+                    }, 1000);
                 </script>
             </div>
             <div class="box">
