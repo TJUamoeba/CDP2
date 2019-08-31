@@ -51,14 +51,45 @@
             <!--begin Welcome-->
             <div class="welcome">
                 <div class="box">
-                    <h2>温湿数据</h2>
-                    <img src="images/pic2.png" alt="pic2">
-                    <p id="txtTH">
-                        温度: ℃&nbsp; &nbsp; 湿度: %
-                    </p>
+                    <h2 class="h2_1">温度</h2>
+                    <img src="images/wendu.png" alt="wendu">
+                    <h2 class="h2_2" id="txtWendu">0℃</h2>
                 </div>
+                <script>
+                    function RewriteData() {
+                        var xmlhttp;
+                        if (window.XMLHttpRequest) {
+                            // IE7+, Firefox, Chrome, Opera, Safari 浏览器执行代码
+                            xmlhttp = new XMLHttpRequest();
+                        }
+                        else {
+                            // IE6, IE5 浏览器执行代码
+                            xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+                        }
+
+                        xmlhttp.onreadystatechange = function () {
+                            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                                //alert(xmlhttp.responseText);
+                                //alert("操作成功");
+                                var contents = xmlhttp.responseText.split(';');
+                                document.getElementById("txtWendu").innerHTML = contents[0];
+                                document.getElementById("txtShidu").innerHTML = contents[1];
+                            }
+                        }
+
+                        var requestString = "/wenshidata";
+                        xmlhttp.open("GET", requestString, true);
+                        xmlhttp.send(null);
+                    }
+                    window.onload = function () {
+                        RewriteData();
+                    }
+                    var interval3 = setInterval(function () {
+                        RewriteData();
+                    }, 1000);
+                </script>
                 <div class="graph">
-                    <h2>Welcome</h2>
+                    <h2>历史曲线</h2>
                     <p>
                         本项目旨在利用 ESP8266 WIFI模组，实现部分家电的自动化，并通过app和网页端两种方式对室内环境的远程监控和记录。
                     </p>
@@ -77,14 +108,12 @@
             <!--begin Welcome-->
             <div class="welcome">
                 <div class="box">
-                    <h2>温湿数据</h2>
-                    <img src="images/pic2.png" alt="pic2">
-                    <p id="txtTH">
-                        温度: ℃&nbsp; &nbsp; 湿度: %
-                    </p>
+                    <h2 class="h2_1">湿度</h2>
+                    <img src="images/shidu.png" alt="shidu">
+                    <h2 class="h2_2" id="txtShidu">0%</h2>
                 </div>
                 <div class="graph">
-                    <h2>Welcome</h2>
+                    <h2>历史曲线</h2>
                     <p>
                         本项目旨在利用 ESP8266 WIFI模组，实现部分家电的自动化，并通过app和网页端两种方式对室内环境的远程监控和记录。
                     </p>

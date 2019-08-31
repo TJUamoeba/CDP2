@@ -277,6 +277,15 @@ void handleLeddata()
 	webServer.send(200, "text/html", led);
 }
 
+void handleWenshidata() 
+{
+	String wen, shi, content;
+	wen = String(temQueue[QUEUE_LENGTH - 1]) + "℃";
+	shi = String(humQueue[QUEUE_LENGTH - 1]) + "%";
+	content = wen + ";" + shi;
+	webServer.send(200, "text/html", content);
+}
+
 void handleSwitch()
 {
 	if (isLedTurnOn == false)
@@ -286,7 +295,6 @@ void handleSwitch()
 		isLedTurnOn = true;
 		Led_Content = "已打开";
 		ledReport = "ON";
-		//handleLED();
 	}
 	else
 	{
@@ -295,58 +303,63 @@ void handleSwitch()
 		isLedTurnOn = false;
 		Led_Content = "已关闭";
 		ledReport = "OFF";
-		//handleLED();
 	}
 }
 
 void handleTemHum() 
 {
-	byte tem = 0;
-	byte hum = 0;
-	dht11.read(&tem, &hum, NULL);
-	temReport = String(tem);
-	humReport = String(hum);
-	String postPage1 = String("") +
-		"                <p>温度:" + temReport + "℃&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp湿度:" + humReport + "%</p>" +
-		"                <p>温度历史曲线</p>" +
-		"                <canvas id=\"TemGraph\"></canvas>" +
-		"                <p>湿度历史曲线</p>" +
-		"                <canvas id=\"HumGraph\"></canvas>" +
-		"                <script type=\"text/javascript\">" +
-		"                    var canvas1 = document.getElementById(\'TemGraph\');" +
-		"                    var ctx1 = canvas1.getContext(\'2d\');" +
-		"                    ctx1.lineWidth = \"1px\";" +
-		"                    ctx1.strokeStyle = \"#999\";" +
-		"                    ctx1.moveTo(10, 25);" +
-		"                    ctx1.lineTo(10, 125);" +
-		"                    ctx1.lineTo(280, 125);";
-	String postPage2 = String("") +
-		"                    ctx1.stroke();" +
-		"                    var canvas2 = document.getElementById(\'HumGraph\');" +
-		"                    var ctx2 = canvas2.getContext(\'2d\');" +
-		"                    ctx2.lineWidth = \"1px\";" +
-		"                    ctx2.strokeStyle = \"#999\";" +
-		"                    ctx2.moveTo(10, 25);" +
-		"                    ctx2.lineTo(10, 125);" +
-		"                    ctx2.lineTo(280, 125);";
-	String postPage3 = String("") +
-		"                    ctx2.stroke();" +
-		"                </script>";
-	String postPage = String("");
-	//绘制温度曲线
-	String graph1 = String("") + "                    ctx1.moveTo(10, " + (String)(125 - temQueue[0]) + ");";
-	for (int i = 1; i < QUEUE_LENGTH - 1; i++) 
-	{
-		graph1 += "                    ctx1.lineTo(" + (String)(10 + 9 * i) + ", " + (String)(125 - temQueue[i]) + ");";
+	//byte tem = 0;
+	//byte hum = 0;
+	//dht11.read(&tem, &hum, NULL);
+	//temReport = String(tem);
+	//humReport = String(hum);
+	//String postPage1 = String("") +
+	//	"                <p>温度:" + temReport + "℃&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp湿度:" + humReport + "%</p>" +
+	//	"                <p>温度历史曲线</p>" +
+	//	"                <canvas id=\"TemGraph\"></canvas>" +
+	//	"                <p>湿度历史曲线</p>" +
+	//	"                <canvas id=\"HumGraph\"></canvas>" +
+	//	"                <script type=\"text/javascript\">" +
+	//	"                    var canvas1 = document.getElementById(\'TemGraph\');" +
+	//	"                    var ctx1 = canvas1.getContext(\'2d\');" +
+	//	"                    ctx1.lineWidth = \"1px\";" +
+	//	"                    ctx1.strokeStyle = \"#999\";" +
+	//	"                    ctx1.moveTo(10, 25);" +
+	//	"                    ctx1.lineTo(10, 125);" +
+	//	"                    ctx1.lineTo(280, 125);";
+	//String postPage2 = String("") +
+	//	"                    ctx1.stroke();" +
+	//	"                    var canvas2 = document.getElementById(\'HumGraph\');" +
+	//	"                    var ctx2 = canvas2.getContext(\'2d\');" +
+	//	"                    ctx2.lineWidth = \"1px\";" +
+	//	"                    ctx2.strokeStyle = \"#999\";" +
+	//	"                    ctx2.moveTo(10, 25);" +
+	//	"                    ctx2.lineTo(10, 125);" +
+	//	"                    ctx2.lineTo(280, 125);";
+	//String postPage3 = String("") +
+	//	"                    ctx2.stroke();" +
+	//	"                </script>";
+	//String postPage = String("");
+	////绘制温度曲线
+	//String graph1 = String("") + "                    ctx1.moveTo(10, " + (String)(125 - temQueue[0]) + ");";
+	//for (int i = 1; i < QUEUE_LENGTH - 1; i++) 
+	//{
+	//	graph1 += "                    ctx1.lineTo(" + (String)(10 + 9 * i) + ", " + (String)(125 - temQueue[i]) + ");";
+	//}
+	////绘制湿度曲线
+	//String graph2 = String("") + "                    ctx2.moveTo(" + (String)(10) + ", " + (String)(125 - humQueue[0]) + ");";
+	//for (int i = 1; i < QUEUE_LENGTH - 1; i++) {
+	//	graph2 += "                    ctx2.lineTo(" + (String)(10 + 9 * i) + ", " + (String)(125 - humQueue[i]) + ");";
+	//}
+	//postPage = postPage1 + graph1 + postPage2 + graph2 + postPage3;
+	//String temHumPage = RewritePage(postPage);
+	//webServer.send(200, "text/html", temHumPage);
+	File file = SPIFFS.open("/TemHum.html", "r");
+	if (!file) {
+		Serial.println("File open failed");
 	}
-	//绘制湿度曲线
-	String graph2 = String("") + "                    ctx2.moveTo(" + (String)(10) + ", " + (String)(125 - humQueue[0]) + ");";
-	for (int i = 1; i < QUEUE_LENGTH - 1; i++) {
-		graph2 += "                    ctx2.lineTo(" + (String)(10 + 9 * i) + ", " + (String)(125 - humQueue[i]) + ");";
-	}
-	postPage = postPage1 + graph1 + postPage2 + graph2 + postPage3;
-	String temHumPage = RewritePage(postPage);
-	webServer.send(200, "text/html", temHumPage);
+	size_t sent = webServer.streamFile(file, "text/html");
+	file.close();
 	Serial.println("用户访问了温湿数据页面");
 }
 
@@ -488,6 +501,7 @@ void setup() {
 	webServer.on("/leddata", handleLeddata);
 	webServer.on("/Switch", handleSwitch);
 	webServer.on("/TemHum", handleTemHum);
+	webServer.on("/wenshidata", handleWenshidata);
 	webServer.onNotFound(handleNotFound);
 	webServer.begin();
 	Serial.println("HTTP server started");
