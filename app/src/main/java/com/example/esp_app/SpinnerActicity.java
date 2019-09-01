@@ -151,28 +151,7 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
                 }
                 break;
             }
-            case R.id.led_open_but:{
-                if(socket!=null){
-                    try{
-                        mConnectThread.out.write(1);
-                    }catch (Exception e){
-                        e.printStackTrace();
-                    }
-                }
 
-                break;
-            }
-            case R.id.led_close_but:{
-                if(socket!=null){
-                    try{
-                        mConnectThread.out.write(0);
-
-                    }catch (Exception e){
-                        e.printStackTrace();
-                    }
-                }
-                break;
-            }
         }
 
     }
@@ -183,8 +162,6 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
         switch (content) {
             case "温湿数据": {
                 Intent intent = new Intent(SpinnerActicity.this, HumitureActivity.class);
-                Bundle bundle=new Bundle();
-                intent.putExtras(bundle);
                 startActivity(intent);
                 break;
             }
