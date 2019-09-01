@@ -291,6 +291,11 @@ void handleTem()
 	webServer.send(200, "text/html", String(temQueue[QUEUE_LENGTH - 1]));
 }
 
+void handleHum() 
+{
+	webServer.send(200, "text/html", String(humQueue[QUEUE_LENGTH - 1]));
+}
+
 void handleSwitch()
 {
 	if (isLedTurnOn == false)
@@ -508,6 +513,7 @@ void setup() {
 	webServer.on("/TemHum", handleTemHum);
 	webServer.on("/wenshidata", handleWenshidata);
 	webServer.on("/getTem", handleTem);
+	webServer.on("/getHum", handleHum);
 	webServer.onNotFound(handleNotFound);
 	webServer.begin();
 	Serial.println("HTTP server started");
