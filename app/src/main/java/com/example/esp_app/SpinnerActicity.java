@@ -36,6 +36,8 @@ import java.io.PrintStream;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class SpinnerActicity extends AppCompatActivity implements OnItemSelectedListener,View.OnClickListener {
     private Spinner spi = null;//下拉菜单
@@ -47,6 +49,9 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
     private EditText port;  //端口号
     private int iport;      //字符端口
     public Socket socket;  //套接字
+    private EditText temtxt;
+    private EditText wattxt;
+    private Timer timer;
     public ConnectThread mConnectThread; //Tcp连接线程
     SharedPreferences.Editor editor;
     SharedPreferences sharedPreferences;
@@ -66,9 +71,28 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
         connect = (Button) findViewById(R.id.IP_connect_but);
         Ip = (EditText) findViewById(R.id.IP_num);
         port = (EditText) findViewById(R.id.port_num);
+        temtxt = (EditText) findViewById(R.id.tem_txt);
+        wattxt = (EditText) findViewById(R.id.wat_txt);
 
         String[] arr = {"数据栏▽", "温湿数据", "烟霾数据", "火焰指数"};
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, arr);
+        if(socket!=null&&socket.isConnected()){
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    new Thread(){
+                        public void run(){
+                            try{
+                                mConnectThread.OutPut();
+                                mConnectThread.out.write(2);
+                            }catch (Exception e){
+                                e.printStackTrace();
+                            }
+                        }
+                    }.start();
+                }
+            },0,1000);
+        }
 
         spi.setAdapter(adapter);
         spi.setOnItemSelectedListener((AdapterView.OnItemSelectedListener) this);
