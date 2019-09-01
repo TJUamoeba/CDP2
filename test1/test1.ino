@@ -286,6 +286,11 @@ void handleWenshidata()
 	webServer.send(200, "text/html", content);
 }
 
+void handleTem() 
+{
+	webServer.send(200, "text/html", String(temQueue[QUEUE_LENGTH - 1]));
+}
+
 void handleSwitch()
 {
 	if (isLedTurnOn == false)
@@ -364,8 +369,8 @@ void handleTemHum()
 }
 
 void getTH(){
-  byte tem = 0;
-  byte hum = 0;
+	byte tem = 0;
+	byte hum = 0;
   dht11.read(&tem, &hum, NULL);
   sbuf[0] = tem;
   sbuf[1] = hum;
@@ -376,12 +381,12 @@ String getTHhistory(){
   uint8_t i = 0;
   String temReport = "temperature: ";
   for (i = 1; i < QUEUE_LENGTH - 1; i++){
-    temReport += temQueue[i] + ",";
+	  temReport += String(temQueue[i]) + ",";
     //sbuf[i] = temQueue[i];
   }
   temReport += "humidity: ";
   for(; i < QUEUE_LENGTH * 2; i++){
-    temReport += humQueue[i - QUEUE_LENGTH] + ",";
+    temReport += String(humQueue[i - QUEUE_LENGTH]) + ",";
     //sbuf[i] = temQueue[i - QUEUE_LENGTH];
   }
   return temReport;
@@ -425,7 +430,7 @@ void readData()
 	isReadData = true;
 }
 
-void queueInit(byte queue[]) 
+void queueInit(byte queue[])
 {
 	for (int i = 0; i < QUEUE_LENGTH; i++) 
 	{
@@ -433,7 +438,7 @@ void queueInit(byte queue[])
 	}
 }
 
-void queuePush(byte newdata, byte queue[]) 
+void queuePush(byte newdata, byte queue[])
 {
 	for (int i = 0; i < QUEUE_LENGTH - 1; i++) 
 	{
@@ -502,6 +507,7 @@ void setup() {
 	webServer.on("/Switch", handleSwitch);
 	webServer.on("/TemHum", handleTemHum);
 	webServer.on("/wenshidata", handleWenshidata);
+	webServer.on("/getTem", handleTem);
 	webServer.onNotFound(handleNotFound);
 	webServer.begin();
 	Serial.println("HTTP server started");
