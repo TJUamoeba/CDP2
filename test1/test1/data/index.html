@@ -1,0 +1,136 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP8266局域网控制通信系统</title>
+    <link href='http://fonts.googleapis.com/css?family=Lustria|Niconne|McLaren' rel='stylesheet' type='text/css'>
+    <link href="css/styles.css" rel="stylesheet" type="text/css">
+    <link rel='stylesheet' id='camera-css' href='css/camera.css' type='text/css' media='all'>
+    <script type='text/javascript' src='scripts/jquery.min.js'></script>
+    <script type='text/javascript' src='scripts/jquery.mobile.customized.min.js'></script>
+    <script type='text/javascript' src='scripts/jquery.easing.1.3.js'></script>
+    <script type='text/javascript' src='scripts/camera.min.js'></script>
+    <script>
+        jQuery(function () {
+
+            jQuery('#camera_wrap_1').camera({
+                thumbnails: true
+            });
+        });
+    </script>
+</head>
+<body>
+    <div style="width:728px;height:90px;margin:0 auto;">
+    <script src="http://demo.itivy.com/ggad_728x90.js"></script></div>
+    <header class="wrapperContainer">
+        <div class="wrapper">
+            <div>
+                <div class="logo">
+                    <h1><a href="">ESP<br><span>8266</span></a></h1>
+                    <div class="logoTriangle"></div>
+                </div>
+                <nav>
+                    <ul>
+                        <li class="active"><a href="">首页</a></li>
+                        <li><a href="">LED灯</a></li>
+                        <li><a href="">温湿数据</a></li>
+                        <li><a href="">烟霾数据</a></li>
+                        <li><a href="">火焰指数</a></li>
+                    </ul>
+                </nav>
+                <div class="clearfloat"></div>
+            </div>
+            <div class="clearfloat"></div>
+        </div>
+    </header>
+    <div class="wrapperContainer">
+        <div class="wrapper">
+            <!--begin Welcome-->
+            <div class="welcome">
+                <!--begin slider-->
+                <div class="mySlider">
+                    <div class="camera_wrap camera_green_skin" id="camera_wrap_1">
+                        <div data-thumb="images/slides/thumbs/1.jpg" data-src="images/slides/1.jpg">
+                            <div class="camera_caption fadeFromBottom">
+                                CH340G NODEMCU ESP8266 32M <em>物联网模块</em>
+                            </div>
+                        </div>
+                        <div data-thumb="images/slides/thumbs/2.jpg" data-src="images/slides/2.jpg">
+                            <div class="camera_caption fadeFromBottom">DHT11 <em>温湿度传感器</em></div>
+                        </div>
+                        <div data-thumb="images/slides/thumbs/3.jpg" data-src="images/slides/3.jpg">
+                            <div class="camera_caption fadeFromBottom">HC-SR501 <em>人体红外感应模块</em></div>
+                        </div>
+                        <div data-thumb="images/slides/thumbs/4.jpg" data-src="images/slides/4.jpg">
+                            <div class="camera_caption fadeFromBottom">GP2Y1010AU0F <em>灰尘传感器</em></div>
+                        </div>
+                        <div data-thumb="images/slides/thumbs/5.jpg" data-src="images/slides/5.jpg">
+                            <div class="camera_caption fadeFromBottom"><em>火焰传感器</em></div>
+                        </div>
+                    </div>
+                </div>
+                <!--end slider-->
+                <div class="description">
+                    <h2>Welcome</h2>
+                    <p>
+                        本项目旨在利用 ESP8266 WIFI模组，实现部分家电的自动化，并通过app和网页端两种方式对室内环境的远程监控和记录。
+                    </p>
+                    <p>
+                        此为Web网页端，显示温湿度以及雾霾烟雾折线图数据，以及实现火警警报。
+                    </p>
+                </div>
+                <div class="clearfloat"></div>
+            </div>
+            <!--end Welcome-->
+        </div>
+    </div>
+    <div class="wrapper">
+        <!--begin Boxex -->
+        <div class="boxex">
+            <div class="box">
+                <h2>LED灯</h2>
+                <img src="images/pic1.png" alt="pic1">
+                <p>
+                    状态: OFF
+                </p>
+            </div>
+            <div class="box">
+                <h2>温湿数据</h2>
+                <img src="images/pic2.png" alt="pic2">
+                <p>
+                    温度: 26℃&nbsp; &nbsp; 湿度: 30%
+                </p>
+            </div>
+            <div class="box">
+                <h2>烟霾数据</h2>
+                <img src="images/pic3.png" alt="pic3">
+                <p>
+                    指数: 0 
+                </p>
+            </div>
+            <div class="box lastBox">
+                <h2>火焰指数</h2>
+                <img src="images/pic4.png" alt="pic3">
+                <p>
+                    状态: 无 
+                </p>
+            </div>
+            <div class="clearfloat"></div>
+        </div>
+        <!--end Boxex-->
+        <div class="clearfloat"></div>
+    </div>
+    <div class="clearfloat"></div>
+    <div class="wrapperContainer">
+        <footer>
+            <p>
+                Copyright &copy; <a href="">课程设计第五小组</a>
+            </p>
+            <div class="clearfloat"></div>
+        </footer>
+    </div>
+
+</body>
+</html>
