@@ -52,10 +52,47 @@
                 <div class="led">
                     <h2 class="h2_1">火焰警报</h2>
                     <div class="clearfloat"></div>
-                    <img id="led_pic" src="images/pic4.png" />
+                    <img src="images/pic4.png" />
                     <div class="clearfloat"></div>
-                    <h2 class="h2_2">OFF</h2>
+                    <h2 id="tip" class="h2_2">正常</h2>
                 </div>
+                <script>
+                    var fireStatus = false;
+                    function sendRequest() {
+                        var xmlhttp;
+                        if (window.XMLHttpRequest) {
+                            // IE7+, Firefox, Chrome, Opera, Safari 浏览器执行代码
+                            xmlhttp = new XMLHttpRequest();
+                        }
+                        else {
+                            // IE6, IE5 浏览器执行代码
+                            xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+                        }
+
+                        xmlhttp.onreadystatechange = function () {
+                            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                                if (xmlhttp.responseText == "有火") {
+                                    fireStatus = true;
+                                    alert("警告: 有明火!");
+                                }
+                                else {
+                                    fireStatus = false;
+                                }
+                                document.getElementById("tip").innerHTML = xmlhttp.responseText;
+                            }
+                        }
+
+                        var requestString = "/firedata";
+                        xmlhttp.open("GET", requestString, true);
+                        xmlhttp.send(null);
+                    }
+                    window.onload = function () {
+                        sendRequest();
+                    }
+                    var interval3 = setInterval(function () {
+                        sendRequest();
+                    }, 1000);
+                </script>
                 <div class="clearfloat"></div>
             </div>
         </div>
