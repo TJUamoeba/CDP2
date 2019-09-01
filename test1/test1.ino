@@ -398,6 +398,28 @@ String getTHhistory(){
   //bufLen = QUEUE_LENGTH * 2;
 }
 
+void handleSmoke() 
+{
+	File file = SPIFFS.open("/Smoke.html", "r");
+	if (!file) {
+		Serial.println("File open failed");
+	}
+	size_t sent = webServer.streamFile(file, "text/html");
+	file.close();
+	Serial.println("用户访问了烟霾数据页面");
+}
+
+void handleFire()
+{
+	File file = SPIFFS.open("/Fire.html", "r");
+	if (!file) {
+		Serial.println("File open failed");
+	}
+	size_t sent = webServer.streamFile(file, "text/html");
+	file.close();
+	Serial.println("用户访问了火焰指数页面");
+}
+
 void handleNotFound()
 {
 	String path = webServer.uri();
@@ -514,6 +536,8 @@ void setup() {
 	webServer.on("/wenshidata", handleWenshidata);
 	webServer.on("/getTem", handleTem);
 	webServer.on("/getHum", handleHum);
+	webServer.on("/Smoke", handleSmoke);
+	webServer.on("/Fire", handleFire);
 	webServer.onNotFound(handleNotFound);
 	webServer.begin();
 	Serial.println("HTTP server started");
