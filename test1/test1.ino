@@ -95,7 +95,7 @@ void handleLED() //访问LED页面
 
 void handleHomedata() //发送主页数据
 {
-	String ledStr, thStr, content;
+	String ledStr, thStr, smokeStr, fireStr, content;
 	if (isLedTurnOn == false) 
 	{
 		ledStr = "状态: OFF";
@@ -104,8 +104,17 @@ void handleHomedata() //发送主页数据
 	{
 		ledStr = "状态: ON";
 	}
+	if (isFire == true) 
+	{
+		fireStr = "状态: 危险";
+	}
+	else
+	{
+		fireStr = "状态: 正常";
+	}
+	smokeStr = "指数: ";
 	thStr = "温度: " + String(temQueue[QUEUE_LENGTH - 1]) + "℃  湿度: " + String(humQueue[QUEUE_LENGTH - 1]) + "%";
-	content = ledStr + ";" + thStr;
+	content = ledStr + ";" + thStr + ";" + smokeStr + ";" + fireStr;
 	webServer.send(200, "text/html", content);
 }
 

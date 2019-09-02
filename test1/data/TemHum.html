@@ -12,7 +12,7 @@
     <script type='text/javascript' src='scripts/jquery.mobile.customized.min.js'></script>
     <script type='text/javascript' src='scripts/jquery.easing.1.3.js'></script>
     <script type='text/javascript' src='scripts/camera.min.js'></script>
-    <script src="scripts/highcharts.js"></script>
+    <script src="http://cdn.highcharts.com.cn/highstock/highstock.js"></script>
     <script>
         jQuery(function () {
 
@@ -108,6 +108,9 @@
                             title: {
                                 text: '温度曲线'
                             },
+                            subtitle: {
+                                text: '请缩放图表后查看滚动条'
+                            },
                             chart: {
                                 type: 'spline',
                                 renderTo: 'temGraph',
@@ -157,7 +160,11 @@
                                 title: {
                                     text:'时间'
                                 },
-                                type: 'datetime'
+                                type: 'datetime',
+                                scrollbar: {
+                                    enabled: true,
+                                    showFull: false
+                                }
                             },
                             yAxis: {
                                 title: {
@@ -185,7 +192,7 @@
                                     var data = [],
                                         time = (new Date()).getTime(),
                                         i;
-                                    for (i = -19; i <= 0; i += 1) {
+                                    for (i = -299; i <= 0; i += 1) {
                                         data.push({
                                             x: time + i * 1000,
                                             y: mydata
@@ -233,6 +240,9 @@
                         var options = {
                             title: {
                                 text: '湿度曲线'
+                            },
+                            subtitle: {
+                                text: '请缩放图表后查看滚动条'
                             },
                             chart: {
                                 type: 'spline',
@@ -283,7 +293,11 @@
                                 title: {
                                     text: '时间'
                                 },
-                                type: 'datetime'
+                                type: 'datetime',
+                                scrollbar: {
+                                    enabled: true,
+                                    showFull: false
+                                }
                             },
                             yAxis: {
                                 title: {
@@ -311,7 +325,7 @@
                                     var data = [],
                                         time = (new Date()).getTime(),
                                         i;
-                                    for (i = -19; i <= 0; i += 1) {
+                                    for (i = -299; i <= 0; i += 1) {
                                         data.push({
                                             x: time + i * 1000,
                                             y: mydata

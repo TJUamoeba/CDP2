@@ -111,6 +111,8 @@
                                 var contents = xmlhttp.responseText.split(';');
                                 document.getElementById("txtLED").innerHTML = contents[0];
                                 document.getElementById("txtTH").innerHTML = contents[1];
+                                document.getElementById("txtSmoke").innerHTML = contents[2];
+                                document.getElementById("txtFire").innerHTML = contents[3];
                             }
                         }
 
@@ -136,14 +138,14 @@
             <div class="box">
                 <h2>烟霾数据</h2>
                 <img src="images/pic3.png" alt="pic3">
-                <p>
+                <p id="txtSmoke">
                     指数:  
                 </p>
             </div>
             <div class="box lastBox">
                 <h2>火焰指数</h2>
                 <img src="images/pic4.png" alt="pic3">
-                <p>
+                <p id="txtFire">
                     状态:  
                 </p>
             </div>
