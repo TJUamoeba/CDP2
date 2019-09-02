@@ -481,6 +481,7 @@ void loop() {
           else if (quest == "50") {
             getTH();
             serializeJson(doc, serverClients[i]);
+            serverClients[i].write('\n');
             Serial.printf("TCP client %d get current TH data： \n", i);
             serializeJson(doc, Serial);
             Serial.println();
