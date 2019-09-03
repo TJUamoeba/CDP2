@@ -339,7 +339,6 @@ void queuePush(byte newdata, byte queue[])
 void fireDetect() //火焰监测
 {
   int x = analogRead(A0);
-  Serial.printf("Fire index: %d.\n", x);
   if (x >= 550)
   {
     tone(pinBuz, 1000);
@@ -369,7 +368,7 @@ void pirDetect()
   }
 }
 
-void draw(void)
+/*void draw(void)
 {
   byte tem = 0;
   byte hum = 0;
@@ -386,7 +385,7 @@ void draw(void)
   u8g2.setCursor(78, 40);
   u8g2.print((int)hum);
   u8g2.sendBuffer();
-}
+}*/
 
 void setup()
 {
@@ -465,8 +464,8 @@ void setup()
   myTicker.attach(1, readData);
   ticker2.attach(2, fireDetect);
   ticker3.attach(1, pirDetect);
-  ticker4.attach(5, draw);
-  u8g2.begin();
+  /*ticker4.attach(5, draw);
+  u8g2.begin();*/
 }
 
 void loop()
