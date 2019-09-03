@@ -25,12 +25,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.net.Socket;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class SpinnerActicity extends AppCompatActivity implements OnItemSelectedListener,View.OnClickListener {
     private Spinner spi = null;//下拉菜单
+    private int lastPosition=0;
     private Button ledOn; //开led
     private Button ledOff;  //关led
     private Button connect; //连接按钮
@@ -194,6 +196,14 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
                 startActivity(intent);
                 break;
             }
+        }
+        try {
+            Class<?> clazz = AdapterView.class;
+            Field field = clazz.getDeclaredField("mOldSelectedPosition");
+            field.setAccessible(true);
+            field.setInt(spi,AdapterView.INVALID_POSITION);
+        } catch(Exception e){
+            e.printStackTrace();
         }
     }
 
