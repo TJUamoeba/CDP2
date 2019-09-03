@@ -11,8 +11,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".FireActivity"></activity>
-        <activity android:name=".HazeActiviy"></activity>
-        <activity android:name=".HumitureActivity"></activity>
+        <activity android:name=".HazeActiviy"
+            android:launchMode="singleTask"></activity>
+        <activity android:name=".HumitureActivity"
+            android:launchMode="singleTask"></activity>
         <activity android:name=".SpinnerActicity"
             android:launchMode="singleTask">
 
