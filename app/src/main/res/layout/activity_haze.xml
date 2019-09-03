@@ -27,6 +27,13 @@
         android:textSize="25sp"
         ></TextView>
 
+    <lecho.lib.hellocharts.view.LineChartView
+        android:id="@+id/haze_chart"
+        android:layout_width="400dp"
+        android:layout_height="400dp"
+        >
+    </lecho.lib.hellocharts.view.LineChartView>
+
 
 
 </LinearLayout>
