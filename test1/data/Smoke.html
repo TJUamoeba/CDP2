@@ -54,8 +54,37 @@
                     <div class="clearfloat"></div>
                     <img id="led_pic" src="images/pic3.png" />
                     <div class="clearfloat"></div>
-                    <h2 class="h2_2">0</h2>
+                    <h2 id="txtSmoke" class="h2_2">指数: 0</h2>
                 </div>
+                <script>
+                    function RewriteData() {
+                        var xmlhttp;
+                        if (window.XMLHttpRequest) {
+                            // IE7+, Firefox, Chrome, Opera, Safari 浏览器执行代码
+                            xmlhttp = new XMLHttpRequest();
+                        }
+                        else {
+                            // IE6, IE5 浏览器执行代码
+                            xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+                        }
+
+                        xmlhttp.onreadystatechange = function () {
+                            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                                document.getElementById("txtSmoke").innerHTML = xmlhttp.responseText;
+                            }
+                        }
+
+                        var requestString = "/smokedata";
+                        xmlhttp.open("GET", requestString, true);
+                        xmlhttp.send(null);
+                    }
+                    window.onload = function () {
+                        RewriteData();
+                    }
+                    var interval3 = setInterval(function () {
+                        RewriteData();
+                    }, 1000);
+                </script>
                 <div class="clearfloat"></div>
             </div>
         </div>

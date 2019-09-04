@@ -258,6 +258,12 @@ void handleSmoke() //访问烟霾数据页面
   Serial.println("用户访问了烟霾数据页面");
 }
 
+void handleSmokedata() //发送烟霾指数
+{
+	String smokeStr = "指数: ";
+	webServer.send(200, "text/html", smokeStr);
+}
+
 void handleFire() //访问火焰指数页面
 {
   File file = SPIFFS.open("/Fire.html", "r");
@@ -455,6 +461,7 @@ void setup()
   webServer.on("/getTem", handleTem);
   webServer.on("/getHum", handleHum);
   webServer.on("/Smoke", handleSmoke);
+  webServer.on("/smokedata", handleSmokedata);
   webServer.on("/Fire", handleFire);
   webServer.on("/firedata", handleFiredata);
   webServer.onNotFound(handleNotFound);
