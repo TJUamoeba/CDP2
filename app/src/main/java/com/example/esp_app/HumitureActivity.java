@@ -13,11 +13,11 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import lecho.lib.hellocharts.gesture.ContainerScrollType;
+import lecho.lib.hellocharts.gesture.ZoomType;
 import lecho.lib.hellocharts.model.Axis;
 import lecho.lib.hellocharts.model.Line;
 import lecho.lib.hellocharts.model.LineChartData;
 import lecho.lib.hellocharts.model.PointValue;
-import lecho.lib.hellocharts.model.ValueShape;
 import lecho.lib.hellocharts.model.Viewport;
 import lecho.lib.hellocharts.view.LineChartView;
 
@@ -28,14 +28,17 @@ public class HumitureActivity extends SpinnerActicity {
     public List<PointValue> WatPointValueList =new ArrayList<>();//湿度点数据数组
     public List<PointValue> points=new ArrayList<>();//点数组
     public int position=0;
-    public Timer timer;
+    private Timer timer;
     public Axis axisX=new Axis();//横坐标
     public Axis axisY=new Axis();//纵坐标
     public LineChartView mChartView;
     public LineChartView lineChartView;
     public LineChartData data =new LineChartData();
-    public Random random=new Random();
+    private Random random=new Random();
     private ImageButton but;
+    private int[] temdata =new int[1024];
+    private int[] watdata =new int[1024];
+    private int i=0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,35 +54,47 @@ public class HumitureActivity extends SpinnerActicity {
                 startActivity(intent);
             }
         });
-        PrintHumitureLine();
+
+        Intent intent=getIntent();
+        Bundle bundle=intent.getExtras();
+        temdata =bundle.getIntArray("TemData");
+        watdata =bundle.getIntArray("WatData");
+        i=bundle.getInt("length");
+        if(timer!=null){
+            timer.cancel();
+            timer=null;
+        }
         timer=new Timer();
+        PrintHumitureLine();
+
     }
 
+    private Line TemLine=new Line(TemPointValueList);
+    private Line WatLine=new Line(WatPointValueList);
     @Override
     protected void onResume(){
         super.onResume();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                //随机生成新点
-                PointValue value1=new PointValue(position*5,random.nextInt(20)+20);
-                PointValue value2=new PointValue(position*5,random.nextInt(30)+30);
-//                value1.setLabel("00:00");
-//                value2.setLabel("00:00");
-                WatPointValueList.add(value1);
-                TemPointValueList.add(value2);
-                float x=Math.max(value1.getX(),value2.getX());
-                //根据新点画线
-                lines.clear();
-                Line TemLine=new Line(TemPointValueList);
+        mChartView.setInteractive(true);//设置图表是可以交互的（拖拽，缩放等效果的前提）
+        mChartView.setZoomType(ZoomType.HORIZONTAL);//设置缩放方向
+            for(int j=0;j<i;j++){
+                System.out.println("RT"+j);
+                System.out.println(temdata[j]);
+                System.out.println(watdata[j]);
+                PointValue value3=new PointValue(position*5, temdata[j]);
+                PointValue value4=new PointValue(position*5, watdata[j]);
+                TemPointValueList.add(value3);
+                WatPointValueList.add(value4);
+                float x=Math.max(value3.getX(),value4.getX());
+
+                TemLine=new Line(TemPointValueList);
                 TemLine.setColor(Color.RED);//折线颜色
                 TemLine.setCubic(true);//折线是平滑还是直线
-//                TemLine.setShape(ValueShape.CIRCLE);//折线上点的形状
+//              TemLine.setShape(ValueShape.CIRCLE);//折线上点的形状
                 TemLine.setHasLabelsOnlyForSelected(true);//点击点显示数据
                 TemLine.setHasPoints(false);//是否显示圆点 如果为false 则没有原点只有点显示（每个数据点都是个大的圆点）
                 lines.add(TemLine);
 
-                Line WatLine=new Line(WatPointValueList);
+                WatLine=new Line(WatPointValueList);
                 WatLine.setColor(Color.BLUE);
                 WatLine.setCubic(true);
 //                WatLine.setShape(ValueShape.CIRCLE);
@@ -87,7 +102,7 @@ public class HumitureActivity extends SpinnerActicity {
                 WatLine.setHasPoints(false);
                 lines.add(WatLine);
 
-                data =initDatas(lines);
+                data=initDatas(lines);
                 lineChartView.setLineChartData(data);
                 //根据横坐标变换界面显示范围
                 Viewport port;
@@ -104,8 +119,60 @@ public class HumitureActivity extends SpinnerActicity {
                 lineChartView.setMaximumViewport(maxport);
                 position++;
             }
+
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                //随机生成新点
+//                if(temdata[i]!=null&&watdata[i]!=null){
+
+                    PointValue value1=new PointValue(position*5, temdata[i]);
+                    PointValue value2=new PointValue(position*5, watdata[i]);
+//                value1.setLabel("00:00");
+//                value2.setLabel("00:00");
+                    WatPointValueList.add(value2);
+                    TemPointValueList.add(value1);
+                    float x=Math.max(value1.getX(),value2.getX());
+                    //根据新点画线
+                    TemLine=new Line(TemPointValueList);
+                    TemLine.setColor(Color.RED);//折线颜色
+                    TemLine.setCubic(true);//折线是平滑还是直线
+//                TemLine.setShape(ValueShape.CIRCLE);//折线上点的形状
+                    TemLine.setHasLabelsOnlyForSelected(true);//点击点显示数据
+                    TemLine.setHasPoints(false);//是否显示圆点 如果为false 则没有原点只有点显示（每个数据点都是个大的圆点）
+                    lines.add(TemLine);
+
+                    WatLine=new Line(WatPointValueList);
+                    WatLine.setColor(Color.BLUE);
+                    WatLine.setCubic(true);
+//                WatLine.setShape(ValueShape.CIRCLE);
+                    WatLine.setHasLabelsOnlyForSelected(true);
+                    WatLine.setHasPoints(false);
+                    lines.add(WatLine);
+
+                    data =initDatas(lines);
+                    lineChartView.setLineChartData(data);
+                    //根据横坐标变换界面显示范围
+                    Viewport port;
+                    if(x>50){
+                        port=initViewPort(x-50,x);
+                    }
+                    else
+                    {
+                        port=initViewPort(0,50);
+                    }
+                    lineChartView.setCurrentViewport(port);
+
+                    Viewport maxport=initMaxViewPort(x);
+                    lineChartView.setMaximumViewport(maxport);
+                    position++;
+                    i++;
+                }
+
+//            }
         },0,5000);
     }
+
     public void PrintHumitureLine() {
         lineChartView = (LineChartView) findViewById(R.id.humiture_chart);
         //坐标轴
@@ -151,7 +218,7 @@ public class HumitureActivity extends SpinnerActicity {
     private Viewport initViewPort(float left,float right)
     {
         Viewport port=new Viewport();
-        port.top=60;
+        port.top=40;
         port.bottom=0;
         port.left=left;
         port.right=right;
@@ -162,7 +229,7 @@ public class HumitureActivity extends SpinnerActicity {
     private Viewport initMaxViewPort(float right)
     {
         Viewport port=new Viewport();
-        port.top=60;
+        port.top=40;
         port.bottom=0;
         port.left=0;
         port.right=right+50;
