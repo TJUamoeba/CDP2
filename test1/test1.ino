@@ -149,7 +149,7 @@ void handleHomedata() //发送主页数据
   {
     fireStr = "状态: 正常";
   }
-  smokeStr = "指数: ";
+  smokeStr = "指数: " + smogIndex;
   thStr = "温度: " + String(temQueue[QUEUE_LENGTH - 1]) + "℃  湿度: " + String(humQueue[QUEUE_LENGTH - 1]) + "%";
   content = ledStr + ";" + thStr + ";" + smokeStr + ";" + fireStr;
   webServer.send(200, "text/html", content);
@@ -264,7 +264,7 @@ void handleSmoke() //访问烟霾数据页面
 
 void handleSmokedata() //发送烟霾指数
 {
-	String smokeStr = "指数: ";
+	String smokeStr = "指数: " + smogIndex;
 	webServer.send(200, "text/html", smokeStr);
 }
 
