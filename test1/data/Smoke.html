@@ -1,0 +1,103 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP8266局域网控制通信系统</title>
+    <link href='http://fonts.googleapis.com/css?family=Lustria|Niconne|McLaren' rel='stylesheet' type='text/css'>
+    <link href="css/styles.css" rel="stylesheet" type="text/css">
+    <link rel='stylesheet' id='camera-css' href='css/camera.css' type='text/css' media='all'>
+    <script type='text/javascript' src='scripts/jquery.min.js'></script>
+    <script type='text/javascript' src='scripts/jquery.mobile.customized.min.js'></script>
+    <script type='text/javascript' src='scripts/jquery.easing.1.3.js'></script>
+    <script type='text/javascript' src='scripts/camera.min.js'></script>
+    <script>
+        jQuery(function () {
+
+            jQuery('#camera_wrap_1').camera({
+                thumbnails: true
+            });
+        });
+    </script>
+</head>
+<body>
+    <div style="width:728px;height:90px;margin:0 auto;">
+        <script src="http://demo.itivy.com/ggad_728x90.js"></script>
+    </div>
+    <header class="wrapperContainer">
+        <div class="wrapper">
+            <div>
+                <div class="logo">
+                    <h1><a href="">ESP<br><span>8266</span></a></h1>
+                    <div class="logoTriangle"></div>
+                </div>
+                <nav>
+                    <ul>
+                        <li><a href="/">首页</a></li>
+                        <li><a href="/LED">LED灯</a></li>
+                        <li><a href="/TemHum">温湿数据</a></li>
+                        <li class="active"><a href="">烟霾数据</a></li>
+                        <li><a href="/Fire">火焰指数</a></li>
+                    </ul>
+                </nav>
+                <div class="clearfloat"></div>
+            </div>
+            <div class="clearfloat"></div>
+        </div>
+    </header>
+    <div class="wrapperContainer">
+        <div class="wrapper">
+            <div class="welcome">
+                <div class="led">
+                    <h2 class="h2_1">烟霾数据</h2>
+                    <div class="clearfloat"></div>
+                    <img id="led_pic" src="images/pic3.png" />
+                    <div class="clearfloat"></div>
+                    <h2 id="txtSmoke" class="h2_2">指数: 0</h2>
+                </div>
+                <script>
+                    function RewriteData() {
+                        var xmlhttp;
+                        if (window.XMLHttpRequest) {
+                            // IE7+, Firefox, Chrome, Opera, Safari 浏览器执行代码
+                            xmlhttp = new XMLHttpRequest();
+                        }
+                        else {
+                            // IE6, IE5 浏览器执行代码
+                            xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+                        }
+
+                        xmlhttp.onreadystatechange = function () {
+                            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                                document.getElementById("txtSmoke").innerHTML = xmlhttp.responseText;
+                            }
+                        }
+
+                        var requestString = "/smokedata";
+                        xmlhttp.open("GET", requestString, true);
+                        xmlhttp.send(null);
+                    }
+                    window.onload = function () {
+                        RewriteData();
+                    }
+                    var interval3 = setInterval(function () {
+                        RewriteData();
+                    }, 1000);
+                </script>
+                <div class="clearfloat"></div>
+            </div>
+        </div>
+    </div>
+    <div class="clearfloat"></div>
+    <div class="wrapperContainer">
+        <footer>
+            <p>
+                Copyright &copy; <a href="">课程设计第五小组</a>
+            </p>
+            <div class="clearfloat"></div>
+        </footer>
+    </div>
+
+</body>
+</html>

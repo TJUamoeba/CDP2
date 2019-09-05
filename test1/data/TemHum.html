@@ -1,0 +1,359 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP8266局域网控制通信系统</title>
+    <link href='http://fonts.googleapis.com/css?family=Lustria|Niconne|McLaren' rel='stylesheet' type='text/css'>
+    <link href="css/styles.css" rel="stylesheet" type="text/css">
+    <link rel='stylesheet' id='camera-css' href='css/camera.css' type='text/css' media='all'>
+    <script type='text/javascript' src='scripts/jquery.min.js'></script>
+    <script type='text/javascript' src='scripts/jquery.mobile.customized.min.js'></script>
+    <script type='text/javascript' src='scripts/jquery.easing.1.3.js'></script>
+    <script type='text/javascript' src='scripts/camera.min.js'></script>
+    <script src="http://cdn.highcharts.com.cn/highstock/highstock.js"></script>
+    <script>
+        jQuery(function () {
+
+            jQuery('#camera_wrap_1').camera({
+                thumbnails: true
+            });
+        });
+    </script>
+</head>
+<body>
+    <div style="width:728px;height:90px;margin:0 auto;">
+        <script src="http://demo.itivy.com/ggad_728x90.js"></script>
+    </div>
+    <header class="wrapperContainer">
+        <div class="wrapper">
+            <div>
+                <div class="logo">
+                    <h1><a href="">ESP<br><span>8266</span></a></h1>
+                    <div class="logoTriangle"></div>
+                </div>
+                <nav>
+                    <ul>
+                        <li><a href="/">首页</a></li>
+                        <li><a href="/LED">LED灯</a></li>
+                        <li class="active"><a href="/TemHum">温湿数据</a></li>
+                        <li><a href="/Smoke">烟霾数据</a></li>
+                        <li><a href="/Fire">火焰指数</a></li>
+                    </ul>
+                </nav>
+                <div class="clearfloat"></div>
+            </div>
+            <div class="clearfloat"></div>
+        </div>
+    </header>
+    <div class="wrapperContainer">
+        <div class="wrapper">
+            <!--begin Welcome-->
+            <div class="welcome">
+                <div class="box">
+                    <h2 class="h2_1">温度</h2>
+                    <img src="images/wendu.png" alt="wendu">
+                    <h2 class="h2_2" id="txtWendu">0℃</h2>
+                </div>
+                <script>
+                    function RewriteData() {
+                        var xmlhttp;
+                        if (window.XMLHttpRequest) {
+                            // IE7+, Firefox, Chrome, Opera, Safari 浏览器执行代码
+                            xmlhttp = new XMLHttpRequest();
+                        }
+                        else {
+                            // IE6, IE5 浏览器执行代码
+                            xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+                        }
+
+                        xmlhttp.onreadystatechange = function () {
+                            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                                //alert(xmlhttp.responseText);
+                                //alert("操作成功");
+                                var contents = xmlhttp.responseText.split(';');
+                                document.getElementById("txtWendu").innerHTML = contents[0];
+                                document.getElementById("txtShidu").innerHTML = contents[1];
+                            }
+                        }
+
+                        var requestString = "/wenshidata";
+                        xmlhttp.open("GET", requestString, true);
+                        xmlhttp.send(null);
+                    }
+                    window.onload = function () {
+                        RewriteData();
+                    }
+                    var interval3 = setInterval(function () {
+                        RewriteData();
+                    }, 1000);
+                </script>
+                <div class="graph">
+                    <h2>历史曲线</h2>
+                    <div id="temGraph" style="width: 800px; height: 417px"></div>
+                    <script type="text/javascript">
+                        var mydata = null;
+                        var mychart = null;
+                        Highcharts.setOptions({
+                            global: {
+                                useUTC: false
+                            }
+                        });
+                        function activeLastPointToolip(chart) {
+                            var points = chart.series[0].points;
+                            chart.tooltip.refresh(points[points.length - 1]);
+                        }
+                        var options = {
+                            title: {
+                                text: '温度曲线'
+                            },
+                            subtitle: {
+                                text: '请缩放图表后查看滚动条'
+                            },
+                            chart: {
+                                type: 'spline',
+                                renderTo: 'temGraph',
+                                width: 800,
+                                height: 417,
+                                zoomType: 'x',
+                                events: {
+                                    load: function () {
+                                        var series = this.series[0],
+                                            chart = this;
+
+                                        setInterval(function () {
+                                            var xmlhttp;
+                                            if (window.XMLHttpRequest) {
+                                                // IE7+, Firefox, Chrome, Opera, Safari 浏览器执行代码
+                                                xmlhttp = new XMLHttpRequest();
+                                            }
+                                            else {
+                                                // IE6, IE5 浏览器执行代码
+                                                xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+                                            }
+
+                                            xmlhttp.onreadystatechange = function () {
+                                                if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                                                    mydata = xmlhttp.responseText;
+                                                    var x = (new Date()).getTime();
+                                                    var y = parseFloat(xmlhttp.responseText);
+                                                    series.addPoint([x, y], true, true);
+                                                    activeLastPointToolip(chart);
+                                                }
+                                            }
+
+                                            var requestString = "/getTem";
+                                            xmlhttp.open("GET", requestString, true);
+                                            xmlhttp.send(null);
+                                        }, 5000);
+                                    }
+                                }
+                            },
+                            legend: {
+                                enabled: false
+                            },
+                            plotOptions: {
+                                allowPointSelect: true
+                            },
+                            xAxis: {
+                                title: {
+                                    text:'时间'
+                                },
+                                type: 'datetime',
+                                scrollbar: {
+                                    enabled: true,
+                                    showFull: false
+                                }
+                            },
+                            yAxis: {
+                                title: {
+                                    text:'温度(℃)'
+                                },
+                                plotLines: [{
+                                    value: 0,
+                                    width: 1,
+                                    color: '#808080'
+                                }]
+                            },
+                            tooltip: {
+                                formatter: function () {
+                                    return '<b>' + this.series.name + '</b><br/>' +
+                                        Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) + '<br/>' +
+                                        Highcharts.numberFormat(this.y, 0);
+                                }
+                            },
+                            exporting: {
+                                enable: true
+                            },
+                            series: [{
+                                name: '当前温度',
+                                data: (function () {
+                                    var data = [],
+                                        time = (new Date()).getTime(),
+                                        i;
+                                    for (i = -299; i <= 0; i += 1) {
+                                        data.push({
+                                            x: time + i * 1000,
+                                            y: mydata
+                                        });
+                                    }
+                                    return data;
+                                }())
+                            }]
+                        }
+                        mychart = new Highcharts.Chart(options, function (c) {
+                            activeLastPointToolip(c)
+                        });
+                    </script>
+                </div>
+                <div class="clearfloat"></div>
+            </div>
+            <!--end Welcome-->
+        </div>
+    </div>
+    <div class="clearfloat"></div>
+    <div class="wrapperContainer">
+        <div class="wrapper">
+            <!--begin Welcome-->
+            <div class="welcome">
+                <div class="box">
+                    <h2 class="h2_1">湿度</h2>
+                    <img src="images/shidu.png" alt="shidu">
+                    <h2 class="h2_2" id="txtShidu">0%</h2>
+                </div>
+                <div class="graph">
+                    <h2>历史曲线</h2>
+                    <div id="humGraph" style="width: 800px; height: 417px"></div>
+                    <script type="text/javascript">
+                        var mydata = null;
+                        var mychart = null;
+                        Highcharts.setOptions({
+                            global: {
+                                useUTC: false
+                            }
+                        });
+                        function activeLastPointToolip(chart) {
+                            var points = chart.series[0].points;
+                            chart.tooltip.refresh(points[points.length - 1]);
+                        }
+                        var options = {
+                            title: {
+                                text: '湿度曲线'
+                            },
+                            subtitle: {
+                                text: '请缩放图表后查看滚动条'
+                            },
+                            chart: {
+                                type: 'spline',
+                                renderTo: 'humGraph',
+                                width: 800,
+                                height: 417,
+                                zoomType: 'x',
+                                events: {
+                                    load: function () {
+                                        var series = this.series[0],
+                                            chart = this;
+
+                                        setInterval(function () {
+                                            var xmlhttp;
+                                            if (window.XMLHttpRequest) {
+                                                // IE7+, Firefox, Chrome, Opera, Safari 浏览器执行代码
+                                                xmlhttp = new XMLHttpRequest();
+                                            }
+                                            else {
+                                                // IE6, IE5 浏览器执行代码
+                                                xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+                                            }
+
+                                            xmlhttp.onreadystatechange = function () {
+                                                if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                                                    mydata = xmlhttp.responseText;
+                                                    var x = (new Date()).getTime();
+                                                    var y = parseFloat(xmlhttp.responseText);
+                                                    series.addPoint([x, y], true, true);
+                                                    activeLastPointToolip(chart);
+                                                }
+                                            }
+
+                                            var requestString = "/getHum";
+                                            xmlhttp.open("GET", requestString, true);
+                                            xmlhttp.send(null);
+                                        }, 5000);
+                                    }
+                                }
+                            },
+                            legend: {
+                                enabled: false
+                            },
+                            plotOptions: {
+                                allowPointSelect: true
+                            },
+                            xAxis: {
+                                title: {
+                                    text: '时间'
+                                },
+                                type: 'datetime',
+                                scrollbar: {
+                                    enabled: true,
+                                    showFull: false
+                                }
+                            },
+                            yAxis: {
+                                title: {
+                                    text: '湿度(%)'
+                                },
+                                plotLines: [{
+                                    value: 0,
+                                    width: 1,
+                                    color: '#808080'
+                                }]
+                            },
+                            tooltip: {
+                                formatter: function () {
+                                    return '<b>' + this.series.name + '</b><br/>' +
+                                        Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) + '<br/>' +
+                                        Highcharts.numberFormat(this.y, 0);
+                                }
+                            },
+                            exporting: {
+                                enable: true
+                            },
+                            series: [{
+                                name: '当前湿度',
+                                data: (function () {
+                                    var data = [],
+                                        time = (new Date()).getTime(),
+                                        i;
+                                    for (i = -299; i <= 0; i += 1) {
+                                        data.push({
+                                            x: time + i * 1000,
+                                            y: mydata
+                                        });
+                                    }
+                                    return data;
+                                }())
+                            }]
+                        }
+                        mychart = new Highcharts.Chart(options, function (c) {
+                            activeLastPointToolip(c)
+                        });
+                    </script>
+                </div>
+                <div class="clearfloat"></div>
+            </div>
+            <!--end Welcome-->
+        </div>
+    </div>
+    <div class="clearfloat"></div>
+    <div class="wrapperContainer">
+        <footer>
+            <p>
+                Copyright &copy; <a href="">课程设计第五小组</a>
+            </p>
+            <div class="clearfloat"></div>
+        </footer>
+    </div>
+
+</body>
+</html>
