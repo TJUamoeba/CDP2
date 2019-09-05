@@ -4,7 +4,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background">
+    android:background="@drawable/fire">
 
     <ImageButton
         android:id="@+id/image_fire"
@@ -12,4 +12,28 @@
         android:layout_height="40dp"
         android:background="@drawable/but"
         app:srcCompat="@android:drawable/ic_menu_revert" />
+
+    <ImageView
+        android:id="@+id/fire_view"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="130dp"
+        android:background="@drawable/but"
+        app:srcCompat="@android:drawable/stat_notify_error" />
+    <TextView
+        android:id="@+id/fire_txt"
+        android:layout_width="300dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginLeft="50dp"
+        android:textColor="@android:color/background_light"
+        android:lines="1"
+        android:singleLine="true"
+        android:text="无明火出现"
+        android:textSize="30dp"
+        android:typeface="serif"
+        android:gravity="center"
+        >
+    </TextView>
 </LinearLayout>
