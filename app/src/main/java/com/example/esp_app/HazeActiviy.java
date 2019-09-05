@@ -8,7 +8,6 @@ import android.widget.ImageButton;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.io.PipedOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -16,6 +15,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import lecho.lib.hellocharts.gesture.ContainerScrollType;
+import lecho.lib.hellocharts.gesture.ZoomType;
 import lecho.lib.hellocharts.model.Axis;
 import lecho.lib.hellocharts.model.Line;
 import lecho.lib.hellocharts.model.LineChartData;
@@ -27,7 +27,6 @@ import lecho.lib.hellocharts.view.LineChartView;
 public class HazeActiviy extends AppCompatActivity {
 
     private List<Line> lines =new ArrayList<>();//线数组
-    private List<PointValue> SmoPointValueList =new ArrayList<>();//烟雾点数据数组
     private List<PointValue> HazPointValueList =new ArrayList<>();//雾霾点数据数组
     public List<PointValue> points=new ArrayList<>();//点数组
     private int position=0;
@@ -37,8 +36,9 @@ public class HazeActiviy extends AppCompatActivity {
     public LineChartView mChartView;
     public LineChartView lineChartView;
     private LineChartData data=new LineChartData();
-    private Random random=new Random();
     private ImageButton but;
+    private String[] hazedata=new String[4096];
+    private int i=0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,60 +53,103 @@ public class HazeActiviy extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        Intent intent=getIntent();
+        Bundle bundle=intent.getExtras();
+        hazedata =bundle.getStringArray("HazeData");
+        i=bundle.getInt("length");
+        if(timer!=null){
+            timer.cancel();
+            timer=null;
+        }
         PrintHazeLine();
         timer=new Timer();
     }
 
+    private Line HazeLine=new Line(HazPointValueList);
     @Override
     protected void onResume(){
         super.onResume();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                //随机生成新点
-                PointValue value1=new PointValue(position*5,random.nextInt(20)+20);
-                PointValue value2=new PointValue(position*5,random.nextInt(30)+30);
-                value1.setLabel("00:00");
-                value2.setLabel("00:00");
-                SmoPointValueList.add(value1);
-                HazPointValueList.add(value2);
-                float x=Math.max(value1.getX(),value2.getX());
-                //根据新点画线
-                lines.clear();
-                Line SmoLine=new Line(SmoPointValueList);
-                SmoLine.setColor(Color.RED);//折线颜色
-                SmoLine.setCubic(true);//折线是平滑还是直线
-//                SmoLine.setShape(ValueShape.CIRCLE);//折线上点的形状
-                SmoLine.setHasLabelsOnlyForSelected(true);//点击点显示数据
-                SmoLine.setHasPoints(false);
-                lines.add(SmoLine);
+        for(int j=0;j<i;j++){
+            System.out.println("RT"+j);
+            System.out.println(hazedata[j]);
+            PointValue value1=new PointValue(position*5, Float.valueOf(hazedata[j]));
+            HazPointValueList.add(value1);
+            float x=value1.getX();
 
-                Line HazLine=new Line(HazPointValueList);
-                HazLine.setColor(Color.BLUE);
-                HazLine.setCubic(true);
-                HazLine.setShape(ValueShape.CIRCLE);
-                HazLine.setHasLabelsOnlyForSelected(true);
-                HazLine.setHasPoints(false);
-                lines.add(HazLine);
 
-                data=initDatas(lines);
-                lineChartView.setLineChartData(data);
-                //根据横坐标变换界面显示范围
-                Viewport port;
-                if(x>50){
-                    port=initViewPort(x-50,x);
-                }
-                else
-                {
-                    port=initViewPort(0,50);
-                }
-                lineChartView.setCurrentViewport(port);
+            HazeLine=new Line(HazPointValueList);
+            HazeLine.setColor(Color.BLUE);
+            HazeLine.setCubic(true);
+            HazeLine.setHasLabelsOnlyForSelected(true);
+            HazeLine.setHasPoints(false);
+            lines.add(HazeLine);
 
-                Viewport maxport=initMaxViewPort(x);
-                lineChartView.setMaximumViewport(maxport);
-                position++;
+            data=initDatas(lines);
+            lineChartView.setLineChartData(data);
+            //根据横坐标变换界面显示范围
+            Viewport port;
+            if(x>50){
+                port=initViewPort(x-50,x);
             }
-        },0,5000);
+            else
+            {
+                port=initViewPort(0,50);
+            }
+            lineChartView.setCurrentViewport(port);
+
+            Viewport maxport=initMaxViewPort(x);
+            lineChartView.setMaximumViewport(maxport);
+            position++;
+        }
+
+//        timer.schedule(new TimerTask() {
+//            @Override
+//            public void run() {
+//                //随机生成新点
+//                PointValue value1=new PointValue(position*5,smodata[i]);
+//                PointValue value2=new PointValue(position*5,hazedata[i]);
+//                value1.setLabel("00:00");
+//                value2.setLabel("00:00");
+//                SmoPointValueList.add(value1);
+//                HazPointValueList.add(value2);
+//                float x=Math.max(value1.getX(),value2.getX());
+//                //根据新点画线
+//                lines.clear();
+//                Line SmoLine=new Line(SmoPointValueList);
+//                SmoLine.setColor(Color.YELLOW);//折线颜色
+//                SmoLine.setCubic(true);//折线是平滑还是直线
+////                SmoLine.setShape(ValueShape.CIRCLE);//折线上点的形状
+//                SmoLine.setHasLabelsOnlyForSelected(true);//点击点显示数据
+//                SmoLine.setHasPoints(false);
+//                lines.add(SmoLine);
+//
+//                Line HazLine=new Line(HazPointValueList);
+//                HazLine.setColor(Color.BLUE);
+//                HazLine.setCubic(true);
+//                HazLine.setShape(ValueShape.CIRCLE);
+//                HazLine.setHasLabelsOnlyForSelected(true);
+//                HazLine.setHasPoints(false);
+//                lines.add(HazLine);
+//
+//                data=initDatas(lines);
+//                lineChartView.setLineChartData(data);
+//                //根据横坐标变换界面显示范围
+//                Viewport port;
+//                if(x>50){
+//                    port=initViewPort(x-50,x);
+//                }
+//                else
+//                {
+//                    port=initViewPort(0,50);
+//                }
+//                lineChartView.setCurrentViewport(port);
+//
+//                Viewport maxport=initMaxViewPort(x);
+//                lineChartView.setMaximumViewport(maxport);
+//                position++;
+//                i++;
+//            }
+//        },0,5000);
     }
 
     public void PrintHazeLine(){
@@ -130,8 +173,10 @@ public class HazeActiviy extends AppCompatActivity {
         lineChartView.setLineChartData(data);
 
         Viewport viewport=initViewPort(0,50);
+        //设置行为属性，支持缩放、滑动以及平移
         lineChartView.setCurrentViewportWithAnimation(viewport);
-        lineChartView.setInteractive(false);
+        mChartView.setInteractive(true);//设置图表是可以交互的（拖拽，缩放等效果的前提）
+        mChartView.setZoomType(ZoomType.HORIZONTAL);//设置缩放方向
         lineChartView.setScrollEnabled(true);
         lineChartView.setValueTouchEnabled(true);
         lineChartView.setFocusableInTouchMode(true);
