@@ -36,8 +36,8 @@ public class HumitureActivity extends SpinnerActicity {
     public LineChartData data =new LineChartData();
     private Random random=new Random();
     private ImageButton but;
-    private int[] temdata =new int[1024];
-    private int[] watdata =new int[1024];
+    private int[] temdata =new int[4096];
+    private int[] watdata =new int[4096];
     private int i=0;
 
     @Override
@@ -74,8 +74,6 @@ public class HumitureActivity extends SpinnerActicity {
     @Override
     protected void onResume(){
         super.onResume();
-        mChartView.setInteractive(true);//设置图表是可以交互的（拖拽，缩放等效果的前提）
-        mChartView.setZoomType(ZoomType.HORIZONTAL);//设置缩放方向
             for(int j=0;j<i;j++){
                 System.out.println("RT"+j);
                 System.out.println(temdata[j]);
@@ -120,57 +118,57 @@ public class HumitureActivity extends SpinnerActicity {
                 position++;
             }
 
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                //随机生成新点
-//                if(temdata[i]!=null&&watdata[i]!=null){
-
-                    PointValue value1=new PointValue(position*5, temdata[i]);
-                    PointValue value2=new PointValue(position*5, watdata[i]);
-//                value1.setLabel("00:00");
-//                value2.setLabel("00:00");
-                    WatPointValueList.add(value2);
-                    TemPointValueList.add(value1);
-                    float x=Math.max(value1.getX(),value2.getX());
-                    //根据新点画线
-                    TemLine=new Line(TemPointValueList);
-                    TemLine.setColor(Color.RED);//折线颜色
-                    TemLine.setCubic(true);//折线是平滑还是直线
-//                TemLine.setShape(ValueShape.CIRCLE);//折线上点的形状
-                    TemLine.setHasLabelsOnlyForSelected(true);//点击点显示数据
-                    TemLine.setHasPoints(false);//是否显示圆点 如果为false 则没有原点只有点显示（每个数据点都是个大的圆点）
-                    lines.add(TemLine);
-
-                    WatLine=new Line(WatPointValueList);
-                    WatLine.setColor(Color.BLUE);
-                    WatLine.setCubic(true);
-//                WatLine.setShape(ValueShape.CIRCLE);
-                    WatLine.setHasLabelsOnlyForSelected(true);
-                    WatLine.setHasPoints(false);
-                    lines.add(WatLine);
-
-                    data =initDatas(lines);
-                    lineChartView.setLineChartData(data);
-                    //根据横坐标变换界面显示范围
-                    Viewport port;
-                    if(x>50){
-                        port=initViewPort(x-50,x);
-                    }
-                    else
-                    {
-                        port=initViewPort(0,50);
-                    }
-                    lineChartView.setCurrentViewport(port);
-
-                    Viewport maxport=initMaxViewPort(x);
-                    lineChartView.setMaximumViewport(maxport);
-                    position++;
-                    i++;
-                }
-
-//            }
-        },0,5000);
+//        timer.schedule(new TimerTask() {
+//            @Override
+//            public void run() {
+//                //随机生成新点
+////                if(temdata[i]!=null&&watdata[i]!=null){
+//
+//                    PointValue value1=new PointValue(position*5, temdata[i]);
+//                    PointValue value2=new PointValue(position*5, watdata[i]);
+////                value1.setLabel("00:00");
+////                value2.setLabel("00:00");
+//                    WatPointValueList.add(value2);
+//                    TemPointValueList.add(value1);
+//                    float x=Math.max(value1.getX(),value2.getX());
+//                    //根据新点画线
+//                    TemLine=new Line(TemPointValueList);
+//                    TemLine.setColor(Color.RED);//折线颜色
+//                    TemLine.setCubic(true);//折线是平滑还是直线
+////                TemLine.setShape(ValueShape.CIRCLE);//折线上点的形状
+//                    TemLine.setHasLabelsOnlyForSelected(true);//点击点显示数据
+//                    TemLine.setHasPoints(false);//是否显示圆点 如果为false 则没有原点只有点显示（每个数据点都是个大的圆点）
+//                    lines.add(TemLine);
+//
+//                    WatLine=new Line(WatPointValueList);
+//                    WatLine.setColor(Color.BLUE);
+//                    WatLine.setCubic(true);
+////                WatLine.setShape(ValueShape.CIRCLE);
+//                    WatLine.setHasLabelsOnlyForSelected(true);
+//                    WatLine.setHasPoints(false);
+//                    lines.add(WatLine);
+//
+//                    data =initDatas(lines);
+//                    lineChartView.setLineChartData(data);
+//                    //根据横坐标变换界面显示范围
+//                    Viewport port;
+//                    if(x>50){
+//                        port=initViewPort(x-50,x);
+//                    }
+//                    else
+//                    {
+//                        port=initViewPort(0,50);
+//                    }
+//                    lineChartView.setCurrentViewport(port);
+//
+//                    Viewport maxport=initMaxViewPort(x);
+//                    lineChartView.setMaximumViewport(maxport);
+//                    position++;
+//                    i++;
+//                }
+//
+////            }
+//        },0,5000);
     }
 
     public void PrintHumitureLine() {
@@ -195,8 +193,10 @@ public class HumitureActivity extends SpinnerActicity {
         lineChartView.setLineChartData(data);
 
         Viewport viewport = initViewPort(0, 50);
+        //设置行为属性，支持缩放、滑动以及平移
         lineChartView.setCurrentViewportWithAnimation(viewport);
-        lineChartView.setInteractive(false);
+        mChartView.setInteractive(true);//设置图表是可以交互的（拖拽，缩放等效果的前提）
+        mChartView.setZoomType(ZoomType.HORIZONTAL);//设置缩放方向
         lineChartView.setScrollEnabled(true);
         lineChartView.setValueTouchEnabled(true);
         lineChartView.setFocusableInTouchMode(true);
@@ -205,7 +205,7 @@ public class HumitureActivity extends SpinnerActicity {
         lineChartView.startDataAnimation();
         points = new ArrayList<>();
     }
-
+    //使用数据建立坐标轴
     private LineChartData initDatas(List<Line> line)
     {
         LineChartData lineChartData=new LineChartData(line);

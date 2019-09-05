@@ -39,6 +39,7 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
     public Socket socket;  //套接字
     private TextView temtxt;
     private TextView wattxt;
+    private TextView hazetxt;
     private Timer timer;
     private BufferedReader buf;
     public ConnectThread mConnectThread; //Tcp连接线程
@@ -46,8 +47,10 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
     SharedPreferences sharedPreferences;
     public final static String Pre_IP = "PREF_IP_ADDRESS";
     public final static String Pre_PORT = "PREF_PORT_NUMBER";
-    public int[] TemData = new int[4096];
-    public int[] WatData = new int[4096];
+    private int[] TemData = new int[4096];
+    private int[] WatData = new int[4096];
+    private String[] HazeData = new String[4096];
+    private int ifFire=0;
     private int length = 0;
 
     @Override
@@ -65,8 +68,9 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
         port = (EditText) findViewById(R.id.port_num);
         temtxt = (TextView) findViewById(R.id.tem_txt);
         wattxt = (TextView) findViewById(R.id.wat_txt);
+        hazetxt=(TextView)findViewById(R.id.haze_txt);
 
-        String[] arr = {"数据栏▽", "温湿数据", "烟霾数据", "火焰指数"};
+        String[] arr = {"数据栏▽", "温湿数据", "烟霾数据", "火焰情况","关于我们"};
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, arr);
 
 
@@ -78,8 +82,10 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
                 new Thread() {
                     public void run() {
                         try {
+                            String str = "1";
+                            byte[] tem = str.getBytes();
                             mConnectThread.OutPut();
-                            mConnectThread.out.write(1);
+                            mConnectThread.out.write(tem);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -94,8 +100,10 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
                 new Thread() {
                     public void run() {
                         try {
+                            String str = "0";
+                            byte[] tem = str.getBytes();
                             mConnectThread.OutPut();
-                            mConnectThread.out.write(0);
+                            mConnectThread.out.write(tem);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -120,7 +128,9 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
                 try {
                     if (socket != null && socket.isConnected()) {
                         mConnectThread.out = socket.getOutputStream();
-                        mConnectThread.out.write(2);
+                        String str = "2";
+                        byte[] tem = str.getBytes();
+                        mConnectThread.out.write(tem);
                         ReceiveThread receiveThread = new ReceiveThread();
                         receiveThread.start();
                     }
@@ -190,12 +200,24 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
 
             case "烟霾数据": {
                 Intent intent = new Intent(SpinnerActicity.this, HazeActiviy.class);
+                Bundle bundle=new Bundle();
+                bundle.putStringArray("HazeData",HazeData);
+                bundle.putInt("length",length);
+                intent.putExtras(bundle);
                 startActivity(intent);
                 break;
             }
 
-            case "火焰指数": {
+            case "火焰情况": {
                 Intent intent = new Intent(SpinnerActicity.this, FireActivity.class);
+                Bundle bundle=new Bundle();
+                bundle.putInt("ifFire",ifFire);
+                intent.putExtras(bundle);
+                startActivity(intent);
+                break;
+            }
+            case "关于我们":{
+                Intent intent=new Intent(SpinnerActicity.this,AboutActivity.class);
                 startActivity(intent);
                 break;
             }
@@ -275,14 +297,18 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
                     }
                     s = sb.toString();
                     String[] slist = s.split(",");
-                    if (slist.length == 2) {
+                    if(slist.length==4){
                         TemData[length] = Integer.valueOf(slist[0]);
                         WatData[length] = Integer.valueOf(slist[1]);
-                        System.out.println("Received: " + TemData[length] + " " + slist[1]);
+                        HazeData[length]=slist[2];
+                        ifFire=Integer.valueOf(slist[3]);
+                        System.out.println("Received: " + TemData[length] + " " + WatData[length]+" "+ HazeData[length]+" "+ifFire);
+                        //主界面显示温湿度数据
                         temtxt.setText(String.valueOf(TemData[length]));
                         wattxt.setText(String.valueOf(WatData[length]));
-                        System.out.println("St" + TemData[length]);
-                        System.out.println(WatData[length]);
+                        hazetxt.setText(String.valueOf(HazeData[length]));
+
+                        //测试数据
                         System.out.println(length);
                         length++;
                     }
