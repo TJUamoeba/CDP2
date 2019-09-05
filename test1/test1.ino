@@ -46,6 +46,8 @@ WiFiClient serverClients[MAX_SRV_CLIENTS];
 ESP8266WebServer webServer(80);
 
 //网络名和密码
+//const char *ssid = "Qr";
+//const char *password = "17695550200";
 const char *ssid = "335Room";
 const char *password = "helloworld";
 //const char *ssid = "OPPO R11";
@@ -56,9 +58,11 @@ bool isReadData = false;
 bool isFire = false;
 String Led_Content = "已关闭";
 
-//温湿度数据
+//数据
 byte temQueue[QUEUE_LENGTH];
 byte humQueue[QUEUE_LENGTH];
+String smogIndex;
+int fireIndex;
 
 //定时调度
 Ticker myTicker;
@@ -216,34 +220,34 @@ void handleTemHum() //访问温湿数据页面
   Serial.println("用户访问了温湿数据页面");
 }
 
-//获取当前温湿度
-void getTH()
+void getTH() //2: 获取当前温湿度
 {
   byte tem = 0;
   byte hum = 0;
   dht11.read(&tem, &hum, NULL);
-
+  doc["DATA"] = "CurrentTH";
   doc["CTemperature"] = String(tem);
   doc["CHumitiy"] = String(hum);
 }
 
-//获取历史温湿度
-void getTHhistory()
+void getTHhistory() //3: 获取历史温湿度
 {
   uint8_t i;
 
+  doc["DATA"] = "HistoryTH";
   JsonArray Htemperature = doc.createNestedArray("Htemperature");
   JsonArray Hhumitiy = doc.createNestedArray("Hhumitiy");
 
   for (i = 0; i < QUEUE_LENGTH; i++)
   {
     Htemperature.add(temQueue[i]);
-  }
-  for (i = 0; i < QUEUE_LENGTH; i++)
-  {
-    Hhumitiy.add(humQueue[i]);
-  }
 
+    for (i = 0; i < QUEUE_LENGTH; i++)
+    {
+      Hhumitiy.add(humQueue[i]);
+    }
+
+  }
 }
 
 void handleSmoke() //访问烟霾数据页面
@@ -338,8 +342,8 @@ void queuePush(byte newdata, byte queue[])
 
 void fireDetect() //火焰监测
 {
-  int x = analogRead(A0);
-  if (x >= 550)
+  fireIndex = analogRead(A0);
+  if (fireIndex >= 550)
   {
     tone(pinBuz, 1000);
     isFire = true;
@@ -367,25 +371,6 @@ void pirDetect()
     Serial.println("There is nobody in room/pass, the light is turned off.");
   }
 }
-
-/*void draw(void)
-{
-  byte tem = 0;
-  byte hum = 0;
-  dht11.read(&tem, &hum, NULL);
-
-  u8g2.clearBuffer();
-  u8g2.setFont(u8g2_font_ncenB08_tr);
-  u8g2.setCursor(5, 20);
-  u8g2.print("TEMP(oC):");
-  u8g2.setCursor(78, 20);
-  u8g2.print((int)tem);
-  u8g2.setCursor(5, 40);
-  u8g2.print("HUMI(%):");
-  u8g2.setCursor(78, 40);
-  u8g2.print((int)hum);
-  u8g2.sendBuffer();
-}*/
 
 void setup()
 {
@@ -462,10 +447,8 @@ void setup()
 
   //定时调度
   myTicker.attach(1, readData);
-  ticker2.attach(2, fireDetect);
+  ticker2.attach(4, fireDetect);
   ticker3.attach(1, pirDetect);
-  /*ticker4.attach(5, draw);
-  u8g2.begin();*/
 }
 
 void loop()
@@ -509,46 +492,74 @@ void loop()
   {
     if (serverClients[i] && serverClients[i].connected())
     {
-      //有链接时灯常亮
-      digitalWrite(16, 0);
       if (serverClients[i].available())
       {
+        String quest = "";
         while (serverClients[i].available())
         {
-          quest += serverClients[i].read();
-          Serial.write("Receive quest: " + serverClients[i].read());
-          Serial.println("Receive quest : " + quest);
-          //开灯
-          if (quest == "0" && isLedTurnOn == true)
-          {
-            handleSwitch();
-          }
-          else if (quest == "1" && isLedTurnOn == false)
-          {
-            handleSwitch();
-          }
-          else if (quest == "50")
-          { //请求当前温湿度
-            getTH();
-            serializeJson(doc, serverClients[i]);
-            serverClients[i].write('\n');
-            Serial.printf("TCP client %d get current TH data： \n", i);
-            serializeJson(doc, Serial);
-            Serial.println();
-            Serial.println();
-            doc.clear();
-          }
-          else if (quest == "51")
-          { //请求历史温湿度
-            getTHhistory();
-            serializeJson(doc, serverClients[i]);
-            serverClients[i].write('\n');
-            Serial.printf("TCP client %d get history TH data： \n", i);
-            serializeJson(doc, Serial);
-            Serial.println();
-            Serial.println();
-            doc.clear();
-          }
+          char ch = serverClients[i].read();
+          Serial.println(ch);
+          quest += ch;
+          delay(20);
+        }
+        
+        Serial.println("Receive quest : " + quest);
+        if (quest == "0" && isLedTurnOn == true)
+        {
+          handleSwitch();
+        }
+        else if (quest == "1" && isLedTurnOn == false)
+        {
+          handleSwitch();
+        }
+        
+        else if (quest == "2") //App端请求数据
+        { 
+          byte tem = 0;
+          byte hum = 0;
+          dht11.read(&tem, &hum, NULL);
+          int t = tem;
+          int h = hum;
+          String flag = isFire ? "1" : "0";
+          String s = String(t)  + "," + String(h) + "," + smogIndex + "," + flag;
+          serverClients[i].print(s);
+          serverClients[i].write('\n');
+          Serial.printf("TCP client %d get current TH data：", i);
+          Serial.println(s);
+        }
+        else if (quest == "3")
+        { //请求历史温湿度
+          getTHhistory();
+          serializeJson(doc, serverClients[i]);
+          serverClients[i].write('\n');
+          Serial.printf("TCP client %d get history TH data： \n", i);
+          serializeJson(doc, Serial);
+          Serial.println();
+          Serial.println();
+          doc.clear();
+        }
+         else if (quest == "4")
+        { //请求历史温湿度
+          serverClients[i].print(fireIndex);
+          serverClients[i].write('\n');
+          Serial.printf("FireIndex: " + fireIndex);
+        }
+        else if (quest == "10")
+        {
+          getTH();
+          serializeJson(doc, serverClients[i]);
+          serverClients[i].write('\n');
+          Serial.printf("ESP8266(NO.2) get current TH data： \n", i);
+          serializeJson(doc, Serial);
+          Serial.println();
+          Serial.println();
+          doc.clear();
+        }
+        else if (quest.indexOf("Smog:")!=-1)
+        {
+          int i = quest.indexOf("Smog:") + 5;
+          smogIndex = quest.substring(i,i+4);
+          Serial.println("Received Smog Index: " + smogIndex);
         }
       }
     }
