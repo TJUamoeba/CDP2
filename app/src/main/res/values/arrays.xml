@@ -4,7 +4,8 @@
         <item>数据栏▽ </item>
         <item>温湿数据</item>
         <item>烟霾数据</item>
-        <item>火焰指数</item>
+        <item>火焰情况</item>
+        <item>关于我们</item>
     </string-array>
 
 </resources>

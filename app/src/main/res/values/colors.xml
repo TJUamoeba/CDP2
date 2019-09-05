@@ -3,6 +3,7 @@
     <color name="colorPrimary">#FF84FFFF</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#61FBFCFC</color>
+    <color name="colorFire">#F7F70303</color>
     <color name="bac" tools:ignore="ReferenceType">@drawable/background</color>
 
 </resources>

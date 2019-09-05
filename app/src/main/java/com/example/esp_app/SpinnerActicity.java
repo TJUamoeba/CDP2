@@ -5,8 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.CountDownTimer;
-import android.util.Log;
+
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -20,9 +19,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
@@ -32,7 +29,6 @@ import java.util.TimerTask;
 
 public class SpinnerActicity extends AppCompatActivity implements OnItemSelectedListener,View.OnClickListener {
     private Spinner spi = null;//下拉菜单
-    private int lastPosition=0;
     private Button ledOn; //开led
     private Button ledOff;  //关led
     private Button connect; //连接按钮
@@ -43,17 +39,19 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
     public Socket socket;  //套接字
     private TextView temtxt;
     private TextView wattxt;
+    private TextView hazetxt;
     private Timer timer;
-    private String TemResult="";//接受温度数据数组
-    private String WatResult="";//接受湿度数据数组
     private BufferedReader buf;
-    private InputStream in;
-    private DataInputStream din;
     public ConnectThread mConnectThread; //Tcp连接线程
     SharedPreferences.Editor editor;
     SharedPreferences sharedPreferences;
     public final static String Pre_IP = "PREF_IP_ADDRESS";
     public final static String Pre_PORT = "PREF_PORT_NUMBER";
+    private int[] TemData = new int[4096];
+    private int[] WatData = new int[4096];
+    private String[] HazeData = new String[4096];
+    private int ifFire=0;
+    private int length = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,8 +68,9 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
         port = (EditText) findViewById(R.id.port_num);
         temtxt = (TextView) findViewById(R.id.tem_txt);
         wattxt = (TextView) findViewById(R.id.wat_txt);
+        hazetxt=(TextView)findViewById(R.id.haze_txt);
 
-        String[] arr = {"数据栏▽", "温湿数据", "烟霾数据", "火焰指数"};
+        String[] arr = {"数据栏▽", "温湿数据", "烟霾数据", "火焰情况","关于我们"};
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, arr);
 
 
@@ -83,8 +82,10 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
                 new Thread() {
                     public void run() {
                         try {
+                            String str = "1";
+                            byte[] tem = str.getBytes();
                             mConnectThread.OutPut();
-                            mConnectThread.out.write(0);
+                            mConnectThread.out.write(tem);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -99,8 +100,10 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
                 new Thread() {
                     public void run() {
                         try {
+                            String str = "0";
+                            byte[] tem = str.getBytes();
                             mConnectThread.OutPut();
-                            mConnectThread.out.write(1);
+                            mConnectThread.out.write(tem);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -114,22 +117,27 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
         Ip.setText(sharedPreferences.getString(Pre_IP, ""));
         port.setText(sharedPreferences.getString(Pre_PORT, ""));
 
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
+        }
         timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                new Thread() {
-                    public void run() {
-                        try {
-                            mConnectThread.OutPut();
-                            mConnectThread.out.write(50);
-                            mConnectThread.out.flush();
-                            mConnectThread.InPut();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                try {
+                    if (socket != null && socket.isConnected()) {
+                        mConnectThread.out = socket.getOutputStream();
+                        String str = "2";
+                        byte[] tem = str.getBytes();
+                        mConnectThread.out.write(tem);
+                        ReceiveThread receiveThread = new ReceiveThread();
+                        receiveThread.start();
                     }
-                }.start();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
             }
         }, 0, 5000);
     }
@@ -181,18 +189,35 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
         switch (content) {
             case "温湿数据": {
                 Intent intent = new Intent(SpinnerActicity.this, HumitureActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putIntArray("TemData", TemData);
+                bundle.putIntArray("WatData", WatData);
+                bundle.putInt("length", length);
+                intent.putExtras(bundle);
                 startActivity(intent);
                 break;
             }
 
             case "烟霾数据": {
                 Intent intent = new Intent(SpinnerActicity.this, HazeActiviy.class);
+                Bundle bundle=new Bundle();
+                bundle.putStringArray("HazeData",HazeData);
+                bundle.putInt("length",length);
+                intent.putExtras(bundle);
                 startActivity(intent);
                 break;
             }
 
-            case "火焰指数": {
+            case "火焰情况": {
                 Intent intent = new Intent(SpinnerActicity.this, FireActivity.class);
+                Bundle bundle=new Bundle();
+                bundle.putInt("ifFire",ifFire);
+                intent.putExtras(bundle);
+                startActivity(intent);
+                break;
+            }
+            case "关于我们":{
+                Intent intent=new Intent(SpinnerActicity.this,AboutActivity.class);
                 startActivity(intent);
                 break;
             }
@@ -201,8 +226,8 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
             Class<?> clazz = AdapterView.class;
             Field field = clazz.getDeclaredField("mOldSelectedPosition");
             field.setAccessible(true);
-            field.setInt(spi,AdapterView.INVALID_POSITION);
-        } catch(Exception e){
+            field.setInt(spi, AdapterView.INVALID_POSITION);
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -219,25 +244,6 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
         public ConnectThread(String ip, int port) {
             this.ip = ip;
             this.port = port;
-        }
-        public void InPut  () throws IOException {
-            System.out.println("/////");
-            in=socket.getInputStream();
-            buf=new BufferedReader(new InputStreamReader(in));
-            StringBuffer out=new StringBuffer();
-            byte[] b=new byte[2048];
-            int n=in.read(b);
-            while(n!='\n'){
-                out.append(new String(b,0,n));
-                TemResult+=n;
-            }
-            System.out.println(TemResult);
-            System.out.println("///llllllll//");
-//                       TemResult=String.valueOf(buf.read());
-            temtxt.setText(TemResult);
-
-
-
         }
 
         public void OutPut() {
@@ -275,41 +281,43 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
 
     }
 
-    //倒计时刷新数据模式方法
-//    private void initView()
-//    {
-//        n=n+1;
-//            countDownTimer =new CountDownTimer(n*5000,5000) {
-//                @Override
-//                public void onTick(long millisUntilFinished) {
-//                        new Thread(){
-//                            public void run(){
-//                                try{
-//                                    mConnectThread.OutPut();
-//                                    mConnectThread.out.write(2);
-//                                }catch (Exception e){
-//                                    e.printStackTrace();
-//                                }
-//                            }
-//                        }.start();
-//                        String m=String.valueOf(n);
-//                        Toast.makeText(SpinnerActicity.this, m, Toast.LENGTH_LONG).show();
-//                }
-//
-//                @Override
-//                public void onFinish() {
-//                    Toast.makeText(SpinnerActicity.this, "数据传输异常", Toast.LENGTH_LONG).show();
-//                }
-//            };
-//            countDownTimer.start();
-//    }
-//
-//    @Override
-//    protected void onDestroy() {
-//        super.onDestroy();
-//        if (countDownTimer != null) {
-//            countDownTimer.cancel();
-//            countDownTimer = null;
-//        }
-//    }
+    private class ReceiveThread extends Thread {
+        public void run() {
+            try {
+                System.out.println("Start receive.");
+                buf = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                String s;
+                int i;
+                StringBuilder sb = new StringBuilder();
+                if (buf.ready()) {
+                    while ((i = buf.read()) != '\n') {
+                        //String s = String.valueOf(i);
+                        char ch = (char) i;
+                        sb.append(ch);
+                    }
+                    s = sb.toString();
+                    String[] slist = s.split(",");
+                    if(slist.length==4){
+                        TemData[length] = Integer.valueOf(slist[0]);
+                        WatData[length] = Integer.valueOf(slist[1]);
+                        HazeData[length]=slist[2];
+                        ifFire=Integer.valueOf(slist[3]);
+                        System.out.println("Received: " + TemData[length] + " " + WatData[length]+" "+ HazeData[length]+" "+ifFire);
+                        //主界面显示温湿度数据
+                        temtxt.setText(String.valueOf(TemData[length]));
+                        wattxt.setText(String.valueOf(WatData[length]));
+                        hazetxt.setText(String.valueOf(HazeData[length]));
+
+                        //测试数据
+                        System.out.println(length);
+                        length++;
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.out.println("Received Message FAILED ");
+            }
+        }
+    }
+
 }
