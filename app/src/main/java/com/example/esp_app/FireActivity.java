@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,11 +22,13 @@ public class FireActivity extends AppCompatActivity {
     private TextView firetxt;
     private ImageView fireview;
     private MediaPlayer player;
+    private LinearLayout linearLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fire_war);
+        linearLayout=(LinearLayout)findViewById(R.id.layout);
         firetxt=(TextView)findViewById(R.id.fire_txt);
         fireview=(ImageView)findViewById(R.id.fire_view);
         but=(ImageButton)findViewById(R.id.image_fire);
@@ -40,11 +43,13 @@ public class FireActivity extends AppCompatActivity {
         Intent intent=getIntent();
         Bundle bundle=intent.getExtras();
         iffire=bundle.getInt("ifFire");
+//        iffire=1;
         if(iffire==1){
             firetxt.setText("请注意，有明火出现！");
             firetxt.setTextSize(25);
             firetxt.setTextColor(Color.RED);
             fireview.setBackgroundDrawable(getResources().getDrawable(R.drawable.firebut));
+            linearLayout.setBackgroundDrawable(getResources().getDrawable(R.drawable.fire));
             player = MediaPlayer.create(this, R.raw.firemusic);
             try {
                 player.prepare();// 同步

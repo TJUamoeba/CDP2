@@ -75,9 +75,17 @@
         android:textSize="15sp"
         ></TextView>
     <TextView
+        android:layout_width="150dp"
+        android:layout_height="20dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="140dp"
+        android:text="开发心得:我太难了"
+        android:gravity="center"
+
+        ></TextView>
+    <TextView
         android:layout_width="220dp"
         android:layout_height="20dp"
-        android:layout_marginTop="180dp"
         android:layout_gravity="center"
         android:text="© 2019 QrZHB.All rights Reserved."
         android:gravity="center"

@@ -3,8 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
+    android:id="@+id/layout"
     android:layout_height="match_parent"
-    android:background="@drawable/fire">
+    android:background="@drawable/background">
 
     <ImageButton
         android:id="@+id/image_fire"
@@ -27,7 +28,7 @@
         android:layout_height="40dp"
         android:layout_marginTop="30dp"
         android:layout_marginLeft="50dp"
-        android:textColor="@android:color/background_light"
+        android:textColor="@android:color/background_dark"
         android:lines="1"
         android:singleLine="true"
         android:text="无明火出现"

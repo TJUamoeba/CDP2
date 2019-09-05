@@ -78,7 +78,7 @@ public class HazeActiviy extends AppCompatActivity {
 
 
             HazeLine=new Line(HazPointValueList);
-            HazeLine.setColor(Color.BLUE);
+            HazeLine.setColor(Color.YELLOW);
             HazeLine.setCubic(true);
             HazeLine.setHasLabelsOnlyForSelected(true);
             HazeLine.setHasPoints(false);
@@ -106,25 +106,14 @@ public class HazeActiviy extends AppCompatActivity {
 //            @Override
 //            public void run() {
 //                //随机生成新点
-//                PointValue value1=new PointValue(position*5,smodata[i]);
-//                PointValue value2=new PointValue(position*5,hazedata[i]);
-//                value1.setLabel("00:00");
-//                value2.setLabel("00:00");
-//                SmoPointValueList.add(value1);
+//                PointValue value2=new PointValue(position*5,Float.valueOf(hazedata[i]));
 //                HazPointValueList.add(value2);
-//                float x=Math.max(value1.getX(),value2.getX());
+//                float x=value2.getX();
 //                //根据新点画线
 //                lines.clear();
-//                Line SmoLine=new Line(SmoPointValueList);
-//                SmoLine.setColor(Color.YELLOW);//折线颜色
-//                SmoLine.setCubic(true);//折线是平滑还是直线
-////                SmoLine.setShape(ValueShape.CIRCLE);//折线上点的形状
-//                SmoLine.setHasLabelsOnlyForSelected(true);//点击点显示数据
-//                SmoLine.setHasPoints(false);
-//                lines.add(SmoLine);
 //
 //                Line HazLine=new Line(HazPointValueList);
-//                HazLine.setColor(Color.BLUE);
+//                HazLine.setColor(Color.YELLOW);
 //                HazLine.setCubic(true);
 //                HazLine.setShape(ValueShape.CIRCLE);
 //                HazLine.setHasLabelsOnlyForSelected(true);

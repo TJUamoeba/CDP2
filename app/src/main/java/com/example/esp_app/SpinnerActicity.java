@@ -28,7 +28,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class SpinnerActicity extends AppCompatActivity implements OnItemSelectedListener,View.OnClickListener {
-    private Spinner spi = null;//下拉菜单
+    public Spinner spi = null;//下拉菜单
     private Button ledOn; //开led
     private Button ledOff;  //关led
     private Button connect; //连接按钮
@@ -52,6 +52,7 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
     private String[] HazeData = new String[4096];
     private int ifFire=0;
     private int length = 0;
+    private boolean aBoolean=true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,8 +74,8 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
         String[] arr = {"数据栏▽", "温湿数据", "烟霾数据", "火焰情况","关于我们"};
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, arr);
 
-
         spi.setAdapter(adapter);
+        spi.setSelection(0,true);
         spi.setOnItemSelectedListener((AdapterView.OnItemSelectedListener) this);
         ledOn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -185,43 +186,44 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        String content = spi.getSelectedItem().toString();
-        switch (content) {
-            case "温湿数据": {
-                Intent intent = new Intent(SpinnerActicity.this, HumitureActivity.class);
-                Bundle bundle = new Bundle();
-                bundle.putIntArray("TemData", TemData);
-                bundle.putIntArray("WatData", WatData);
-                bundle.putInt("length", length);
-                intent.putExtras(bundle);
-                startActivity(intent);
-                break;
-            }
+            String content = spi.getSelectedItem().toString();
+            switch (content) {
+                case "温湿数据": {
+                    Intent intent = new Intent(SpinnerActicity.this, HumitureActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putIntArray("TemData", TemData);
+                    bundle.putIntArray("WatData", WatData);
+                    bundle.putInt("length", length);
+                    intent.putExtras(bundle);
+                    startActivity(intent);
+                    break;
+                }
 
-            case "烟霾数据": {
-                Intent intent = new Intent(SpinnerActicity.this, HazeActiviy.class);
-                Bundle bundle=new Bundle();
-                bundle.putStringArray("HazeData",HazeData);
-                bundle.putInt("length",length);
-                intent.putExtras(bundle);
-                startActivity(intent);
-                break;
-            }
+                case "烟霾数据": {
+                    Intent intent = new Intent(SpinnerActicity.this, HazeActiviy.class);
+                    Bundle bundle=new Bundle();
+                    bundle.putStringArray("HazeData",HazeData);
+                    bundle.putInt("length",length);
+                    intent.putExtras(bundle);
+                    startActivity(intent);
+                    break;
+                }
 
-            case "火焰情况": {
-                Intent intent = new Intent(SpinnerActicity.this, FireActivity.class);
-                Bundle bundle=new Bundle();
-                bundle.putInt("ifFire",ifFire);
-                intent.putExtras(bundle);
-                startActivity(intent);
-                break;
-            }
-            case "关于我们":{
-                Intent intent=new Intent(SpinnerActicity.this,AboutActivity.class);
-                startActivity(intent);
-                break;
-            }
-        }
+                case "火焰情况": {
+                    Intent intent = new Intent(SpinnerActicity.this, FireActivity.class);
+                    Bundle bundle=new Bundle();
+                    bundle.putInt("ifFire",ifFire);
+                    intent.putExtras(bundle);
+                    startActivity(intent);
+                    break;
+                }
+                case "关于我们":{
+                    Intent intent=new Intent(SpinnerActicity.this,AboutActivity.class);
+                    startActivity(intent);
+                    break;
+                }
+             }
+        spi.setSelection(0,true);
         try {
             Class<?> clazz = AdapterView.class;
             Field field = clazz.getDeclaredField("mOldSelectedPosition");
