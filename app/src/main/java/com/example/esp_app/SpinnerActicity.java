@@ -39,6 +39,7 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
     public Socket socket;  //套接字
     private TextView temtxt;
     private TextView wattxt;
+    private TextView txtfire;
     private TextView hazetxt;
     private Timer timer;
     private BufferedReader buf;
@@ -70,6 +71,7 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
         temtxt = (TextView) findViewById(R.id.tem_txt);
         wattxt = (TextView) findViewById(R.id.wat_txt);
         hazetxt=(TextView)findViewById(R.id.haze_txt);
+        txtfire=(TextView)findViewById(R.id.txt_fire);
 
         String[] arr = {"数据栏▽", "温湿数据", "烟霾数据", "火焰情况","关于我们"};
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, arr);
@@ -309,7 +311,20 @@ public class SpinnerActicity extends AppCompatActivity implements OnItemSelected
                         temtxt.setText(String.valueOf(TemData[length]));
                         wattxt.setText(String.valueOf(WatData[length]));
                         hazetxt.setText(String.valueOf(HazeData[length]));
-
+                        String n="危险";
+                        String m="正常";
+                        if(ifFire==1)
+                        {
+                            txtfire.setText(n);
+                            Intent intent = new Intent(SpinnerActicity.this, FireActivity.class);
+                            Bundle bundle=new Bundle();
+                            bundle.putInt("ifFire",ifFire);
+                            intent.putExtras(bundle);
+                            startActivity(intent);
+                        }
+                        else if(ifFire==0){
+                            txtfire.setText(m);
+                        }
                         //测试数据
                         System.out.println(length);
                         length++;

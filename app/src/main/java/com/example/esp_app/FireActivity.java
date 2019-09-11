@@ -63,5 +63,12 @@ public class FireActivity extends AppCompatActivity {
             // //播放
             player.start();
         }
+        else if(iffire==0){
+            firetxt.setText("无明火出现");
+            firetxt.setTextSize(30);
+            firetxt.setTextColor(Color.BLACK);
+            fireview.setBackgroundDrawable(getResources().getDrawable(R.drawable.but));
+            linearLayout.setBackgroundDrawable(getResources().getDrawable(R.drawable.background));
+        }
     }
 }

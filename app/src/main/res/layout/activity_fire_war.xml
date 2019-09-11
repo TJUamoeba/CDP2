@@ -32,7 +32,7 @@
         android:lines="1"
         android:singleLine="true"
         android:text="无明火出现"
-        android:textSize="30dp"
+        android:textSize="30sp"
         android:typeface="serif"
         android:gravity="center"
         >
